@@ -1,0 +1,53 @@
+<script type="text/javascript">
+    RED.nodes.registerType('current-zone',{
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            name: {value:""},
+            zoneAction: {value:"Get",required:true}
+        },
+        inputs:1,
+        outputs:2,
+        icon: "impinj.png",
+        label: function() {
+            return this.name||this.zoneAction + " current zone map";
+        },
+        oneditprepare: function () {
+            $("#zone-action").val(this.zoneAction);
+        },
+        oneditsave: function () {
+            $("#node-input-zoneAction").val($("select#zone-action option:selected").val());
+        }
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="current-zone">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="zone-action"><i class="fa fa-repeat"></i> Action </label>
+        <select id="zone-action">
+            <option value="Get" selected>Get Current Zone Map</option>
+            <option value="Update">Set Current Zone Map</option>
+            <option value="Clear">Clear Current Zone Map</option>
+        </select>
+        <input type="hidden" id="node-input-zoneAction">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="current-zone">
+    <h3>Sets, Gets or Clears the current zone map</h3>
+    <p>Reads the Itemsense instance from the "itemsense" variable of the flow context, such as one created by a
+    connect node. For Get and Clear, optionally <code>msg.payload</code> can be an object and have a <code>facility</code>
+    property, which is used as the parameter to the call. for Set, the <code>msg.payload</code> should have a <code>zoneMapName</code>
+     property which will be used to set that zoneMap as the current one.</p>
+    <p>The first output contains the result of call <code>msg.payload</code> if it succeeds.
+    </p>
+        <p> The second output is for logging and debugging, contains a
+    <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
+    of the operation.
+    </p>
+</script>

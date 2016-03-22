@@ -1,0 +1,53 @@
+<script type="text/javascript">
+    RED.nodes.registerType('queue-client',{
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            name: {value:""},
+            fromZone: {value:""},
+            toZone: {value:""},
+            epc: {value:""}
+        },
+        inputs:1,
+        outputs:3,
+        icon: "impinj.png",
+        label: function() {
+            return this.name||"Message Queue";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="queue-client">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-fromZone"><i class="icon-tag"></i> From Zone</label>
+        <input type="text" id="node-input-fromZone" placeholder="From Zone Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-toZone"><i class="icon-tag"></i> To Zone</label>
+        <input type="text" id="node-input-toZone" placeholder="To Zone Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-epc"><i class="icon-tag"></i> EPC Filter</label>
+        <input type="text" id="node-input-epc" placeholder="EPC Filter">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="queue-client">
+    <h3>Subscribes to and consumes from an Itemsense AMQP message queue</h3>
+    <p>Gets the Itemsense object from "itemsense" flow context variable, so should be downstream to a component (such
+    as the connect node) that creates that variable.</p>
+    <p>The node parameters can be passed to it using <code>msg.payload</code>, i.e. in an object that has keys for
+    <code>fromZone, toZone, and/or epc</code>. if msg.payload does not contain a parameter, that parameter is read
+    from the node configuration. All parameters are optional.</p>
+    <p> The first output will have the registered queue and server url</p>
+    <p> The second output will be fired at each message arrival. it will have a <code>msg.topic="AMQPMessage"</code> and
+    the message will be in <code>msg.payload</code>. </p>
+        <p> The third output is for logging and debugging, contains a
+    <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
+    of the operation.
+    </p>
+</script>

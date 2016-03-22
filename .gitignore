@@ -1,0 +1,9 @@
+/node_modules
+/.idea
+/*.iml
+/public/javascripts/app.js
+/public/stylesheets/**
+.__browserify_string_empty.js
+public/projects/*
+!public/projects/readme
+tests/experiments/*.log

@@ -1,0 +1,55 @@
+<script type="text/javascript">
+    RED.nodes.registerType('get-object',{
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            name: {value:""},
+            objectType: {value:"recipes",required:true}
+        },
+        inputs:1,
+        outputs:2,
+        icon: "impinj.png",
+        label: function() {
+            return this.name||"Get "+this.objectType;
+        },
+        oneditprepare: function () {
+            $("#object-types").val(this.objectType);
+        },
+        oneditsave: function () {
+            $("#node-input-objectType").val($("select#object-types option:selected").val());
+        }
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="get-object">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="object-types"><i class="fa fa-repeat"></i> Repeat </label>
+        <select id="object-types">
+            <option value="recipes" selected>Recipes</option>
+            <option value="readerConfigurations">Reader Configurations</option>
+            <option value="readerDefinitions">Reader Definitions</option>
+            <option value="facilities">Facilities</option>
+            <option value="zoneMaps">Zone Maps</option>
+            <option value="users">Users</option>
+        </select>
+        <input type="hidden" id="node-input-objectType">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="get-object">
+    <h3>Gets an Itemsense object based on its id, or all objects of a certain kind</h3>
+    <p>Reads the Itemsense instance from the "itemsense" variable of the flow context, such as one created by a
+    connect node. if <code>msg.payload</code> contains a <code>name</code> property, it is assumed to be the name
+    of the object to fetch. Otherwise, all objects of the selected type are fetched.</p>
+    <p>The first output contains an array of fetched objects in <code>msg.payload</code>.
+    </p>
+        <p> The second output is for logging and debugging, contains a
+    <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
+    of the operation.
+    </p>
+</script>

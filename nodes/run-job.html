@@ -1,0 +1,131 @@
+<script type="text/javascript">
+    RED.nodes.registerType('run-job', {
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            name: {value: ""},
+            itemsense: {value: "", type: "itemsense-instance"},
+            recipe: {value: "", required: true},
+            runLength: {value: 30, required: true},
+            startDelay: {value: "PT0S", required: true},
+            facility: {value: "DEFAULT", required: true}
+        },
+        inputs: 1,
+        outputs: 3,
+        icon: "impinj.png",
+        label: function () {
+            return this.name || "Run Item Sense Job";
+        },
+        oneditprepare: function () {
+            var current = this.itemsense || $("#node-input-itemsense option:selected").val();
+
+            function populateRecipes(){
+                window.relayCall({
+                    itemSense: RED.nodes.node(current),
+                    url: "/configuration/v1/recipes/show",
+                    success:window.populateSelect({
+                        container: "recipe-name",
+                        parameter: "node-input-recipe",
+                        selector: "recipe-selector",
+                        alternative: "no-recipe"
+                    })
+                });
+            }
+
+            function populateFacilities(){
+                window.relayCall({
+                    itemSense: RED.nodes.node(current),
+                    url: "/configuration/v1/facilities/show",
+                    success:window.populateSelect({
+                        container: "facility-name",
+                        parameter: "node-input-facility",
+                        selector: "facility-selector",
+                        alternative: "no-facility"
+                    })
+                });
+            }
+
+            function removeSelections(){
+                $("#no-recipe").show();
+                $("#recipe-name").html("");
+                $("#no-facility").show();
+                $("#facility-name").html("");
+            }
+            function populateSelections(){
+                populateRecipes();
+                populateFacilities();
+            }
+            function queryItemsense(newIS){
+                current = newIS;
+                if (current.indexOf("_ADD_") !== -1)
+                    removeSelections();
+                else
+                    populateSelections();
+            }
+            $("#node-input-itemsense").change(function () {
+                var newIS = $("#node-input-itemsense option:selected").val();
+                if (current !== newIS)
+                        queryItemsense(newIS);
+            });
+            queryItemsense(current);
+            console.log(current);
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="run-job">
+    <div class="form-row">
+        <label for="node-input-itemsense"><i class="icon-tag"></i> Itemsense</label>
+        <input type="text" id="node-input-itemsense" placeholder="Itemsense">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Label To show in chart">
+    </div>
+    <div class="form-row">
+        <label for="node-input-runLength"><i class="fa fa-clock-o"></i> Run Length</label>
+        <input type="text" id="node-input-runLength" placeholder="Seconds to run the job">
+    </div>
+    <div class="form-row">
+        <label for="node-input-startDelay"><i class="fa fa-hourglass-start"></i> Start Delay</label>
+        <input type="text" id="node-input-startDelay" placeholder="Seconds to delay starting the job">
+    </div>
+    <div class="form-row">
+        <label for="node-input-facility"><i class="fa fa-file-text"></i> Facility</label>
+        <span id="facility-name"></span>
+        <input type="hidden" id="node-input-facility">
+        <span id="no-facility"> No Itemsense Instance defined</div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-recipe"><i class="fa fa-file-text"></i> Recipe</label>
+        <span id="recipe-name"></span>
+        <input type="hidden" id="node-input-recipe">
+        <span id="no-recipe"> No Itemsense Instance defined</div>
+    </div>
+
+
+
+
+
+
+
+</script>
+
+<script type="text/x-red" data-help-name="run-job">
+    <h3>Starts a job on Itemsense</h3>
+    <p> The Itemsense instance to start a job is extracted from the flow context "itemsense" key. the incoming message
+    can optionally have a <code>msg.jobConfig</code> object to modify the parameters of the job. If the message lacks a
+    parameter, for example the recipe name, that parameter is taken from the config. the user needs to make sure that the
+    parameters in the configuration tab will work with the incoming itemsense object if they are not explicitly specified
+    in the input message.
+    </p>
+    <p> The first output will have <code>msg.topic="job"</code> as well as the job object in the <code>msg.payload</code>
+    if the call succeeds. it will otherwise reflect the msg that was passed into it, keeping all existing properties.
+    this allows for the itemsense object to be used by other nodes in the flow</p>
+    <p> The second output will have <code>msg.topic="jobId"</code> as well as an object in the <code>msg.payload</code>
+    that has an id property the same as the currently running job if starting the new job failed because there was
+    already a job running</p>
+    <p> The Third output is intended for debug and logging. the <code>msg.topic</code> reflects the "success" or "failure"
+    of the operation, and the <code>msg.payload</code> containing a human readable message about the results of the
+    operation</p>
+</script>

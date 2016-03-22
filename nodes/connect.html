@@ -1,0 +1,36 @@
+<script type="text/javascript">
+    RED.nodes.registerType('connect',{
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            itemsense: {value: "", type: "itemsense-instance"},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:2,
+        icon: "impinj.png",
+        label: function() {
+            return this.name||"Connect to Itemsense";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="connect">
+    <div class="form-row">
+        <label for="node-input-itemsense"><i class="icon-tag"></i> Itemsense</label>
+        <input type="text" id="node-input-itemsense" placeholder="Itemsense">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="connect">
+    <h3>Connects to an Itemsense Instance</h3>
+    <p>This is an entry node for every Itemsense flow. it prepares and sets up an Itemsense object for the nodes in the
+    flow to use. It will put that object in the flow context under "itemsense" key.</p>
+    <p>The node creates the object either from its input, if <code>msg.payload.itemsenseUrl</code> exists, or it will
+    use the configuration tab. this will allow both the possibility of running the flow by a click, or sending the Itemsense
+    information from downstream applications, through an HTTP or Websocket call, for example.</p>
+</script>

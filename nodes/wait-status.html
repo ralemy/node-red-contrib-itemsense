@@ -1,0 +1,62 @@
+<script type="text/javascript">
+    RED.nodes.registerType('wait-status', {
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            name: {value: ""},
+            jobStatus: {value: "RUNNING"},
+            timeout:{value:10},
+            interval: {value: 1}
+        },
+        inputs: 1,
+        outputs: 2,
+        icon: "timer.png",
+        label: function () {
+            return this.name || "Wait " + this.jobStatus;
+        },
+        oneditprepare: function () {
+            $("#job-status").val(this.jobStatus);
+        },
+        oneditsave: function () {
+            $("#node-input-jobStatus").val($("select#job-status option:selected").val());
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="wait-status">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="job-status"><i class="fa fa-repeat"></i> Job Status </label>
+        <select id="job-status">
+            <option value="RUNNING" selected>Running</option>
+            <option value="STOPPED">Stopped</option>
+        </select>
+        <input type="hidden" id="node-input-jobStatus">
+    </div>
+    <div class="form-row">
+        <label for="node-input-interval"><i class="icon-tag"></i> Interval</label>
+        <input type="number" id="node-input-interval" placeholder="Seconds">
+    </div>
+    <div class="form-row">
+        <label for="node-input-timeout"><i class="fa fa-clock-o"></i> Timeout</label>
+        <input type="number" id="node-input-timeout" placeholder="Seconds">
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="wait-status">
+    <h3>Waits for a job to get to a given status</h3>
+    <p> Periodically queries the Itemsense instance for the job object. the frequency of calls is set by the UI and
+    defaults to one second. Expects the <code>msg.payload</code> to be an object with an id property that is used as
+    the job id for queries. Expects the Itemsense object in flow variable "itemsense", so should be downstream to a
+    connect node. Will timeout if the job doesn't get to the desired status by the specified timeout interval.</p>
+    <p> The first output will have the job object in its <code>msg.payload</code> if the job reaches the desired state.
+    </p>
+    <p>The second output is for logging and debugging, contains a
+    <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
+    of the operation.
+    </p>
+</script>

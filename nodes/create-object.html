@@ -1,0 +1,55 @@
+<script type="text/javascript">
+    RED.nodes.registerType('create-object',{
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            name: {value:""},
+            objectType: {value:"recipes",required:true}
+        },
+        inputs:1,
+        outputs:2,
+        icon: "impinj.png",
+        label: function() {
+            return this.name||"Update "+this.objectType;
+        },
+        oneditprepare: function () {
+            $("#object-types").val(this.objectType);
+        },
+        oneditsave: function () {
+            $("#node-input-objectType").val($("select#object-types option:selected").val());
+        }
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="create-object">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="object-types"><i class="fa fa-repeat"></i> Repeat </label>
+        <select id="object-types">
+            <option value="recipes" selected>Recipes</option>
+            <option value="readerConfigurations">Reader Configurations</option>
+            <option value="readerDefinitions">Reader Definitions</option>
+            <option value="facilities">Facilities</option>
+            <option value="zoneMaps">Zone Maps</option>
+            <option value="users">Users</option>
+        </select>
+        <input type="hidden" id="node-input-objectType">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="create-object">
+    <h3>Create or update an object in an Itemsense Instance</h3>
+    <p>Reads the Itemsense instance from the "itemsense" variable of the flow context, such as one created by a
+    connect node. the <code>msg.payload</code> should contain a valid JSON for the creation of the object. if the
+     object already exists, it is updated. </p>
+    <p>The first output contains the response from the server if the call was successful.
+    </p>
+        <p> The second output is for logging and debugging, contains a
+    <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
+    of the operation.
+    </p>
+</script>

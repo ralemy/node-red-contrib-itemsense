@@ -1,0 +1,86 @@
+<script type="text/javascript">
+    RED.nodes.registerType('itemsense-instance',{
+        category: 'config',
+        defaults: {
+            url:{value:"",required:true},
+            user:{value:"",required:true},
+            password:{value:"",required:true}
+        },
+        label: function() {
+            return this.url||"Itemsense Instance";
+        }
+    });
+    window.populateSelect=function(opts) {
+        var container = $("#" + opts.container),
+                parameter = $("#" + opts.parameter),
+                selector = opts.selector,
+                key = opts.key || "name",
+                value = opts.value || key,
+                alternative = $("#" + opts.alternative);
+
+        return function (list) {
+            container.html("");
+
+            var optionString = "";
+            list.forEach(function (r) {
+                optionString += "<option value='" + r.name + "' " +
+                        (r[key] === parameter.val() ? "selected" : "") + ">" + r[value] + "</option>";
+            });
+            if (!optionString)
+                return;
+            container.html("<select id='" + selector + "'>" + optionString + "</select>");
+            $("#" + selector).change(function () {
+                parameter.val($("#" + selector + " option:selected").val());
+            });
+            parameter.val($("#" + selector + " option:selected").val());
+            alternative.hide();
+        }
+    };
+    window.relayCall = function(opts) {
+        var itemSense = opts.itemSense,
+                url = opts.url,
+                method = opts.method || "GET",
+                body = opts.body,
+                success = opts.success,
+                error = opts.error || function () {
+                            window.alert("error" + JSON.stringify(arguments, null, " "));
+                        };
+        $.ajax({
+            url: "/relay",
+            method: "POST",
+            dataType: "json",
+            data: {
+                url: itemSense.url.replace(/\/$/, "") + url,
+                user: itemSense.user,
+                password: itemSense.password,
+                json: true,
+                method: method,
+                body: body
+            },
+            success: success,
+            error: error
+        });
+    };
+</script>
+
+<script type="text/x-red" data-template-name="itemsense-instance">
+    <div class="form-row">
+        <label for="node-input-url"><i class="fa fa-globe"></i> Url</label>
+        <input type="text" id="node-config-input-url" placeholder="ItemSense base URL">
+    </div>
+    <div class="form-row node-input-useAuth-row">
+        <label for="node-input-user"><i class="fa fa-user"></i> <span data-i18n="common.label.username"></span></label>
+        <input type="text" id="node-config-input-user">
+    </div>
+    <div class="form-row node-input-useAuth-row">
+        <label for="node-input-password"><i class="fa fa-lock"></i> <span data-i18n="common.label.password"></span></label>
+        <input type="password" id="node-config-input-password">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="itemsense-instance">
+    <h3>Keeps Information about an Itemsense Instance</h3>
+    <p>Itemsense nodes will fall back on this node if their incoming message doesnot have an <code>itemsense</code>
+    property, or they need information such as username and password and can't find it in their input message
+    </p>
+</script>
