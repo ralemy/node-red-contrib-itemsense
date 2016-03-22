@@ -16,18 +16,18 @@
   "node-red": {
     "nodes":{
       "connect" : "nodes/connect.js",
-      "queue-client":"nodes/queue-client.js",
-      "create-object":"nodes/create-object.js",
-      "current-zone":"nodes/current-zone.js",
-      "delete-object":"nodes/delete-object.js",
       "filter-jobs":"nodes/filter-jobs.js",
-      "get-items":"nodes/get-items.js",
-      "get-object":"nodes/get-object.js",
-      "item-history":"nodes/item-history.js",
-      "itemsense-instance":"nodes/itemsense-instance.js",
       "run-job":"nodes/run-job.js",
       "stop-job":"nodes/stop-job.js",
-      "wait-status":"nodes/wait-status.js"
+      "wait-status":"nodes/wait-status.js",
+      "get-items":"nodes/get-items.js",
+      "item-history":"nodes/item-history.js",
+      "queue-client":"nodes/queue-client.js",
+      "get-object":"nodes/get-object.js",
+      "create-object":"nodes/create-object.js",
+      "delete-object":"nodes/delete-object.js",
+      "current-zone":"nodes/current-zone.js",
+      "itemsense-instance":"nodes/itemsense-instance.js"
     }
   },
   "author": "Reza Alemy",
