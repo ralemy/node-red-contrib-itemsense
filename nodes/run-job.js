@@ -13,13 +13,13 @@ module.exports = function (RED) {
                 else
                     return {
                         jobId: null,
-                        body: {payload: err.response.body},
+                        body: {payload: err.response.body, statusCode:err.response.statusCode},
                         message: "Job Start Failed:" + err.response.statusCode + " " + JSON.stringify(err.response.body, null, " ")
                     };
             else
                 return {
                     jobId: null,
-                    body: {payload: err.response.statusCode},
+                    body: {statusCode: err.response.statusCode},
                     message: "Job Start Failed:" + err.response.statusCode
                 };
         return {jobId: null, message: err.message};
@@ -60,12 +60,12 @@ module.exports = function (RED) {
                         {topic: "failure", payload: "Another Job is Running " + triage.jobId}
                     ]);
                 else if (triage.body)
-                    node.error(triage.message, {payload: triage.body});
+                    node.error(triage.message, {statusCode: triage.statusCode, payload: triage.body});
                 else
-                    node.error(triage.message, {payload: triage.message})
+                    node.error(triage.message, {statusCode:500, payload: triage.message})
             }).catch(function (err) {
                 console.log("general error", err);
-                node.error(err, {payload: err});
+                node.error(err, {statusCode:500, payload: triageError(err)});
             });
         });
     }
