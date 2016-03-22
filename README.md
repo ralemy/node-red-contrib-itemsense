@@ -1,4 +1,4 @@
-# node-red-contrib-itemsene
+# node-red-contrib-itemsense
 Node-RED contribution package that adds nodes which enable the use of Impinj ItemSense IoT Platform
 
 To learn about using Impinj Itemsense API with Node, see the [Itemsense-node](https://www.npmjs.com/package/itemsense-node) package.
@@ -12,7 +12,7 @@ msg.payload = {
     password: "<your password>"
 };
 ```
-in this case the msg.payload properties will override the configuration properties. 
+in this case the `msg.payload` properties will override the configuration properties. 
 
 
 This can be used to specify the Itemsense instance during runtime by passing the properties in an
