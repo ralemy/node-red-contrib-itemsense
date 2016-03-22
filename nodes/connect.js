@@ -29,7 +29,7 @@ module.exports = function (RED) {
         this.on("input", function (msg) {
             var itemsense = null;
             if (hasItemsenseInfo(msg))
-                itemsense = getItemsense(msg);
+                itemsense = getItemsense(msg.payload);
             else if (LocalItemsense)
                 itemsense = LocalItemsense.itemsense;
             else
