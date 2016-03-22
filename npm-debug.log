@@ -1,0 +1,109 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/Cellar/node/4.1.2/bin/node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   'publish' ]
+2 info using npm@2.14.6
+3 info using node@v4.1.2
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec Result {
+7 silly cache add   raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: '/Users/ralemy/IdeaProjects/node-red-contrib-itemsense',
+7 silly cache add   type: 'directory' }
+8 verbose addLocalDirectory /Users/ralemy/.npm/node-red-contrib-itemsense/1.0.1/package.tgz not in flight; packing
+9 verbose tar pack [ '/Users/ralemy/.npm/node-red-contrib-itemsense/1.0.1/package.tgz',
+9 verbose tar pack   '/Users/ralemy/IdeaProjects/node-red-contrib-itemsense' ]
+10 verbose tarball /Users/ralemy/.npm/node-red-contrib-itemsense/1.0.1/package.tgz
+11 verbose folder /Users/ralemy/IdeaProjects/node-red-contrib-itemsense
+12 info prepublish node-red-contrib-itemsense@1.0.1
+13 verbose addLocalTarball adding from inside cache /Users/ralemy/.npm/node-red-contrib-itemsense/1.0.1/package.tgz
+14 silly cache afterAdd node-red-contrib-itemsense@1.0.1
+15 verbose afterAdd /Users/ralemy/.npm/node-red-contrib-itemsense/1.0.1/package/package.json not in flight; writing
+16 verbose afterAdd /Users/ralemy/.npm/node-red-contrib-itemsense/1.0.1/package/package.json written
+17 silly publish { name: 'node-red-contrib-itemsense',
+17 silly publish   version: '1.0.1',
+17 silly publish   description: 'Node-RED contribution that adds node for the use of Impinj ItemSense IoT platform',
+17 silly publish   repository:
+17 silly publish    { type: 'git',
+17 silly publish      url: 'git+https://github.com/ralemy/node-red-contrib-itemsense.git' },
+17 silly publish   keywords: [ 'IoT', 'RFID', 'Itemsense', 'Impinj', 'Node-RED' ],
+17 silly publish   'node-red':
+17 silly publish    { nodes:
+17 silly publish       { connect: 'nodes/connect.js',
+17 silly publish         'filter-jobs': 'nodes/filter-jobs.js',
+17 silly publish         'run-job': 'nodes/run-job.js',
+17 silly publish         'stop-job': 'nodes/stop-job.js',
+17 silly publish         'wait-status': 'nodes/wait-status.js',
+17 silly publish         'get-items': 'nodes/get-items.js',
+17 silly publish         'item-history': 'nodes/item-history.js',
+17 silly publish         'queue-client': 'nodes/queue-client.js',
+17 silly publish         'get-object': 'nodes/get-object.js',
+17 silly publish         'create-object': 'nodes/create-object.js',
+17 silly publish         'delete-object': 'nodes/delete-object.js',
+17 silly publish         'current-zone': 'nodes/current-zone.js',
+17 silly publish         'itemsense-instance': 'nodes/itemsense-instance.js' } },
+17 silly publish   author: { name: 'Reza Alemy' },
+17 silly publish   license: 'MIT',
+17 silly publish   bugs: { url: 'https://github.com/ralemy/node-red-contrib-itemsense/issues' },
+17 silly publish   homepage: 'https://github.com/ralemy/node-red-contrib-itemsense#readme',
+17 silly publish   readme: '# node-red-contrib-itemsense\nNode-RED contribution package that adds nodes which enable the use of Impinj ItemSense IoT Platform\n\nTo learn about using Impinj Itemsense API with Node, see the [Itemsense-node](https://www.npmjs.com/package/itemsense-node) package.\n\n**Nodes depend on _"itemsense"_ flow variable. start the flow with a _connect_ node to create the needed\nvariable.** The connect node has a config tab to indicate the Itemsense instance. Alternatively, the `msg.payload` of the incoming message to the connect node can be an object:\n```javascript\nmsg.payload = {\n    itemsenseUrl: "http://<your Itemsense Instance>[:port]/itemsense",\n    username: "<your username>",\n    password: "<your password>"\n};\n```\nin this case the `msg.payload` properties will override the configuration properties. \n\n\nThis can be used to specify the Itemsense instance during runtime by passing the properties in an\nHttp or websocket call.\n\n\n',
+17 silly publish   readmeFilename: 'README.md',
+17 silly publish   gitHead: 'a14a8fc2023132fbaec7566b40d0e14c06c303bb',
+17 silly publish   _id: 'node-red-contrib-itemsense@1.0.1',
+17 silly publish   scripts: {},
+17 silly publish   _shasum: '55193ba67d715440c67abc6ac37e1e561b09ec1a',
+17 silly publish   _from: '.' }
+18 verbose getPublishConfig undefined
+19 silly mapToRegistry name node-red-contrib-itemsense
+20 silly mapToRegistry using default registry
+21 silly mapToRegistry registry https://registry.npmjs.org/
+22 silly mapToRegistry uri https://registry.npmjs.org/node-red-contrib-itemsense
+23 verbose publish registryBase https://registry.npmjs.org/
+24 silly publish uploading /Users/ralemy/.npm/node-red-contrib-itemsense/1.0.1/package.tgz
+25 verbose request uri https://registry.npmjs.org/node-red-contrib-itemsense
+26 verbose request sending authorization for write operation
+27 info attempt registry request try #1 at 7:45:19 AM
+28 verbose request using bearer token for auth
+29 verbose request id df2a0fbee7d075e5
+30 http request PUT https://registry.npmjs.org/node-red-contrib-itemsense
+31 http 403 https://registry.npmjs.org/node-red-contrib-itemsense
+32 verbose headers { 'content-type': 'application/json',
+32 verbose headers   'cache-control': 'max-age=300',
+32 verbose headers   'content-length': '95',
+32 verbose headers   'accept-ranges': 'bytes',
+32 verbose headers   date: 'Tue, 22 Mar 2016 14:45:19 GMT',
+32 verbose headers   via: '1.1 varnish',
+32 verbose headers   connection: 'keep-alive',
+32 verbose headers   'x-served-by': 'cache-sjc3124-SJC',
+32 verbose headers   'x-cache': 'MISS',
+32 verbose headers   'x-cache-hits': '0',
+32 verbose headers   'x-timer': 'S1458657919.162957,VS0,VE158' }
+33 verbose request invalidating /Users/ralemy/.npm/registry.npmjs.org/node-red-contrib-itemsense on PUT
+34 error publish Failed PUT 403
+35 verbose stack Error: "You cannot publish over the previously published version 1.0.1." : node-red-contrib-itemsense
+35 verbose stack     at makeError (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:264:12)
+35 verbose stack     at CachingRegistryClient.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:252:14)
+35 verbose stack     at Request._callback (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:172:14)
+35 verbose stack     at Request.self.callback (/usr/local/lib/node_modules/npm/node_modules/request/request.js:198:22)
+35 verbose stack     at emitTwo (events.js:87:13)
+35 verbose stack     at Request.emit (events.js:172:7)
+35 verbose stack     at Request.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/request/request.js:1063:14)
+35 verbose stack     at emitOne (events.js:82:20)
+35 verbose stack     at Request.emit (events.js:169:7)
+35 verbose stack     at IncomingMessage.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/request/request.js:1009:12)
+36 verbose statusCode 403
+37 verbose pkgid node-red-contrib-itemsense
+38 verbose cwd /Users/ralemy/IdeaProjects/node-red-contrib-itemsense
+39 error Darwin 15.3.0
+40 error argv "/usr/local/Cellar/node/4.1.2/bin/node" "/usr/local/bin/npm" "publish"
+41 error node v4.1.2
+42 error npm  v2.14.6
+43 error code E403
+44 error "You cannot publish over the previously published version 1.0.1." : node-red-contrib-itemsense
+45 error If you need help, you may report this error at:
+45 error     <https://github.com/npm/npm/issues>
+46 verbose exit [ 1, true ]
