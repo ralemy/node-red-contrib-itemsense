@@ -1,3 +1,378 @@
 [
-
+  {
+    "type": "tab",
+    "id": "610039f7.4d9c18",
+    "label": "Dump Config For Running Job"
+  },
+  {
+    "id": "f125a1c4.1a66",
+    "type": "itemsense-instance",
+    "z": "",
+    "url": "http://[replace with your itemsense instance url]/itemsense",
+    "user": "[replace with your user]",
+    "password": "[replace with your password]"
+  },
+  {
+    "id": "8a112055.adbb6",
+    "type": "inject",
+    "z": "610039f7.4d9c18",
+    "name": "Start",
+    "topic": "trigger",
+    "payload": "",
+    "payloadType": "date",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "x": 90,
+    "y": 60,
+    "wires": [
+      [
+        "2ec282ee.7b377e"
+      ]
+    ]
+  },
+  {
+    "id": "220c5700.272e4a",
+    "type": "connect",
+    "z": "610039f7.4d9c18",
+    "itemsense": "f125a1c4.1a66",
+    "name": "",
+    "x": 320,
+    "y": 60,
+    "wires": [
+      [
+        "c65235d3.5259c8"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "c65235d3.5259c8",
+    "type": "filter-jobs",
+    "z": "610039f7.4d9c18",
+    "name": "",
+    "jobStatus": "RUNNING",
+    "x": 440,
+    "y": 140,
+    "wires": [
+      [
+        "5eb4116.8a125f"
+      ],
+      [
+        "de1d634f.ed387"
+      ]
+    ]
+  },
+  {
+    "id": "5eb4116.8a125f",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "forEach",
+    "func": "if(msg.payload.length === undefined){\n    node.error({msg:\"Payload is not an Array\",payload:payload})\n    return;    \n}\nif(msg.payload.length===0){\n    node.send([null,{topic:\"failure\",payload:{statusCode:400, message:\"No Job Running\"}}]);\n    return;\n}\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn;",
+    "outputs": "2",
+    "noerr": 0,
+    "x": 540,
+    "y": 60,
+    "wires": [
+      [
+        "6002d9ab.922348",
+        "519b1960.89dbe8"
+      ],
+      [
+        "de1d634f.ed387"
+      ]
+    ]
+  },
+  {
+    "id": "519b1960.89dbe8",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "aggregate Config",
+    "func": "var config = flow.get(\"ConfigDump\") || {};\nif(!config[msg.topic])\n    config[msg.topic]=[];\nconfig[msg.topic].push(msg.payload);\nflow.set(\"ConfigDump\",config);\nmsg.topic = \"ConfigDump\";\nmsg.payload=config;\nreturn msg;",
+    "outputs": "1",
+    "noerr": 0,
+    "x": 1010,
+    "y": 120,
+    "wires": [
+      [
+        "fab7e42c.0eabd8"
+      ]
+    ]
+  },
+  {
+    "id": "6002d9ab.922348",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "get Recipe Name",
+    "func": "msg.payload = {name:msg.payload.job.recipeName};\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 690,
+    "y": 140,
+    "wires": [
+      [
+        "a461107a.0fccd"
+      ]
+    ]
+  },
+  {
+    "id": "a461107a.0fccd",
+    "type": "get-object",
+    "z": "610039f7.4d9c18",
+    "name": "",
+    "objectType": "recipes",
+    "x": 410,
+    "y": 280,
+    "wires": [
+      [
+        "468cce16.1bcf7"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "a90c1299.d62f9",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "get Reader Info",
+    "func": "var readerConfigs={}, \n    readerDefs = {},\n    r = msg.payload;\nif(r.readerConfigurationName)\n    readerConfigs[r.readerConfigurationName]=true;\nif(r.readerConfigurations)\n    Object.keys(r.readerConfigurations).forEach(function(reader){\n        readerDefs[reader]=true;\n        readerConfigs[r.readerConfigurations[reader]]=true;\n    });\nflow.set(\"ExpectedReaderConfigurations\",Object.keys(readerConfigs).length);    \nflow.set(\"ExpectedReaderDefinitions\",Object.keys(readerDefs).length);\nreturn [{\n    topic:\"Configurations\",\n    payload:Object.keys(readerConfigs).map(function(c){\n        return {name:c};\n    })\n},{\n    topic:\"Definitions\",\n    payload:Object.keys(readerDefs).map(function(c){\n        return {name:c};\n    })\n}];",
+    "outputs": "2",
+    "noerr": 0,
+    "x": 300,
+    "y": 500,
+    "wires": [
+      [
+        "4f164675.2f13f8"
+      ],
+      [
+        "106f7aa6.eaf135"
+      ]
+    ]
+  },
+  {
+    "id": "c321c467.b932f8",
+    "type": "get-object",
+    "z": "610039f7.4d9c18",
+    "name": "",
+    "objectType": "readerConfigurations",
+    "x": 650,
+    "y": 420,
+    "wires": [
+      [
+        "66aeddf1.467744"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "4f164675.2f13f8",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "forEach",
+    "func": "if(msg.payload.length === undefined){\n    node.error(\"Payload is not an Array\")\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
+    "outputs": "2",
+    "noerr": 0,
+    "x": 440,
+    "y": 440,
+    "wires": [
+      [
+        "c321c467.b932f8"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "106f7aa6.eaf135",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "forEach",
+    "func": "if(msg.payload.length === undefined){\n    node.error(\"Payload is not an Array\")\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
+    "outputs": "2",
+    "noerr": 0,
+    "x": 420,
+    "y": 560,
+    "wires": [
+      [
+        "9a6d134a.e3f86"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "9a6d134a.e3f86",
+    "type": "get-object",
+    "z": "610039f7.4d9c18",
+    "name": "",
+    "objectType": "readerDefinitions",
+    "x": 620,
+    "y": 580,
+    "wires": [
+      [
+        "66aeddf1.467744"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "fab7e42c.0eabd8",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "Wait for All Info",
+    "func": "var configDump = msg.payload;\nvar KeyVals={\n    Jobs:1,\n    recipes:1,\n    readerConfigurations:flow.get(\"ExpectedReaderConfigurations\"),\n    readerDefinitions:flow.get(\"ExpectedReaderDefinitions\")\n};\nvar shouldReturn = true;\nObject.keys(KeyVals).forEach(function(k){\n    console.log(k,KeyVals[k]);\n    if(configDump[k])\n        if(configDump[k].length=== KeyVals[k])\n            return;\n    shouldReturn = false;        \n});\n\nreturn shouldReturn ? msg : undefined;\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 1060,
+    "y": 240,
+    "wires": [
+      [
+        "b7464110.15598",
+        "3e4ae4f7.e82e7c"
+      ]
+    ]
+  },
+  {
+    "id": "b7464110.15598",
+    "type": "debug",
+    "z": "610039f7.4d9c18",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "false",
+    "x": 1190,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "2ec282ee.7b377e",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "Reset Flow Variables",
+    "func": "flow.set(\"ConfigurationsDone\",null);\nflow.set(\"DefinitionsDone\",null);\nflow.set(\"ConfigDump\",null);\nflow.set(\"ExpectedReaderConfigurations\",-1);    \nflow.set(\"ExpectedReaderDefinitions\",-1);    \nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 130,
+    "y": 200,
+    "wires": [
+      [
+        "220c5700.272e4a"
+      ]
+    ]
+  },
+  {
+    "id": "468cce16.1bcf7",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "forEach",
+    "func": "if(msg.payload.length === undefined){\n    node.error(\"Payload is not an Array\")\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
+    "outputs": "2",
+    "noerr": 0,
+    "x": 320,
+    "y": 380,
+    "wires": [
+      [
+        "519b1960.89dbe8",
+        "a90c1299.d62f9"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "66aeddf1.467744",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "forEach",
+    "func": "if(msg.payload.length === undefined){\n    node.error({msg:\"Payload is not an Array\",payload:payload})\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
+    "outputs": "2",
+    "noerr": 0,
+    "x": 860,
+    "y": 500,
+    "wires": [
+      [
+        "519b1960.89dbe8"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "c6149d8a.a9da8",
+    "type": "http in",
+    "z": "610039f7.4d9c18",
+    "name": "",
+    "url": "/dump/job",
+    "method": "post",
+    "swaggerDoc": "",
+    "x": 110,
+    "y": 320,
+    "wires": [
+      [
+        "2ec282ee.7b377e",
+        "983143eb.54477"
+      ]
+    ]
+  },
+  {
+    "id": "1e57028d.3d123d",
+    "type": "http response",
+    "z": "610039f7.4d9c18",
+    "name": "",
+    "x": 1090,
+    "y": 580,
+    "wires": []
+  },
+  {
+    "id": "983143eb.54477",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "stash Http message",
+    "func": "    flow.set(\"http\",msg);\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 230,
+    "y": 620,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "3e4ae4f7.e82e7c",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "Build Response",
+    "func": "var http = flow.get(\"http\");\nif(!http) return;\nhttp.payload = msg.payload;\nif(msg.statusCode)\n    http.statusCode = msg.statusCode;\nreturn http;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 1130,
+    "y": 360,
+    "wires": [
+      [
+        "1e57028d.3d123d"
+      ]
+    ]
+  },
+  {
+    "id": "de1d634f.ed387",
+    "type": "function",
+    "z": "610039f7.4d9c18",
+    "name": "Report Error",
+    "func": "if(msg.topic !== \"failure\")\n    return;\nmsg.statusCode = msg.payload.statusCode;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 780,
+    "y": 320,
+    "wires": [
+      [
+        "3e4ae4f7.e82e7c"
+      ]
+    ]
+  },
+  {
+    "id": "9c3c063a.e19e88",
+    "type": "comment",
+    "z": "610039f7.4d9c18",
+    "name": "How to use",
+    "info": "In your Node-Red installation:\n```\nnpm install --save node-red-contrib-itemsense\n```\nThen post to /dump/job\nwith body:\n```\n{\n    itemsenseUrl:http://<the url of your instance>/itemsense.\n    username: <your username in the itemsense instance>\n    password: <your password>\n}\n```\nAltrnatively, you can configure the Connect Node Itemsense Instance and run the flow locally by clicking on the Start button",
+    "x": 280,
+    "y": 700,
+    "wires": []
+  }
 ]
