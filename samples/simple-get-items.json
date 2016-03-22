@@ -1,0 +1,232 @@
+[
+  {
+    "type": "tab",
+    "id": "ed224487.bbf838",
+    "label": "Simple Get Items"
+  },
+  {
+    "id": "8f6d3105.c0157",
+    "type": "itemsense-instance",
+    "z": "ed224487.bbf838",
+    "url": "http://[url[:port]/itemsense",
+    "user": "[username]",
+    "password": "[password]"
+  },
+  {
+    "id": "2b43148f.df9eec",
+    "type": "http in",
+    "z": "ed224487.bbf838",
+    "name": "",
+    "url": "/items",
+    "method": "post",
+    "swaggerDoc": "",
+    "x": 120,
+    "y": 120,
+    "wires": [
+      [
+        "b0bce68c.49fcd8"
+      ]
+    ]
+  },
+  {
+    "id": "1e0f82dd.2a103d",
+    "type": "connect",
+    "z": "ed224487.bbf838",
+    "itemsense": "8f6d3105.c0157",
+    "name": "",
+    "x": 400,
+    "y": 280,
+    "wires": [
+      [
+        "c44d3fcf.60fd2"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "c44d3fcf.60fd2",
+    "type": "run-job",
+    "z": "ed224487.bbf838",
+    "name": "",
+    "itemsense": "8f6d3105.c0157",
+    "recipe": "Arlington_Location",
+    "runLength": 30,
+    "startDelay": "PT0S",
+    "facility": "Seattle",
+    "x": 740,
+    "y": 360,
+    "wires": [
+      [
+        "5a344502.4dd3cc"
+      ],
+      [
+        "7af3a98.0715058"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "7af3a98.0715058",
+    "type": "stop-job",
+    "z": "ed224487.bbf838",
+    "name": "",
+    "x": 720,
+    "y": 480,
+    "wires": [
+      [
+        "29d9c2d8.81074e"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "29d9c2d8.81074e",
+    "type": "wait-status",
+    "z": "ed224487.bbf838",
+    "name": "",
+    "jobStatus": "STOPPED",
+    "timeout": 10,
+    "interval": 1,
+    "x": 720,
+    "y": 600,
+    "wires": [
+      [
+        "c44d3fcf.60fd2"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "5a344502.4dd3cc",
+    "type": "wait-status",
+    "z": "ed224487.bbf838",
+    "name": "",
+    "jobStatus": "RUNNING",
+    "timeout": 10,
+    "interval": 1,
+    "x": 960,
+    "y": 300,
+    "wires": [
+      [
+        "713e24c.57f3ddc"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "713e24c.57f3ddc",
+    "type": "get-items",
+    "z": "ed224487.bbf838",
+    "name": "",
+    "epcFilter": "",
+    "repeat": "None",
+    "count": 0,
+    "interval": 1,
+    "x": 1040,
+    "y": 440,
+    "wires": [
+      [
+        "f973cae9.9cec18"
+      ],
+      [],
+      []
+    ]
+  },
+  {
+    "id": "29cbf5ec.f1a6ca",
+    "type": "http response",
+    "z": "ed224487.bbf838",
+    "name": "",
+    "x": 1310,
+    "y": 440,
+    "wires": []
+  },
+  {
+    "id": "8fec2540.601858",
+    "type": "inject",
+    "z": "ed224487.bbf838",
+    "name": "Start",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "x": 130,
+    "y": 400,
+    "wires": [
+      [
+        "b0bce68c.49fcd8"
+      ]
+    ]
+  },
+  {
+    "id": "89381a8e.ab23f8",
+    "type": "comment",
+    "z": "ed224487.bbf838",
+    "name": "How To Run",
+    "info": "Send a Post command with the following body to the /items endpoint\n```\n{\n    itemsenseUrl:http://[your url[:port]]/itemsense,\n    username:[your user name],\n    password:[your password],\n    jobConfig:{\n        recipeName:[Recipe you want to run],\n        facility:[Facility to run the job]\n    }\n}\n```\nAlternatively, add an Itemsense Instance config node to the **Connect** node and use it in the **Run Job** node and start the flow manually by pressing the **Start** Node button.",
+    "x": 280,
+    "y": 540,
+    "wires": []
+  },
+  {
+    "id": "356d2c58.d59534",
+    "type": "debug",
+    "z": "ed224487.bbf838",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "false",
+    "x": 1330,
+    "y": 620,
+    "wires": []
+  },
+  {
+    "id": "2bdc588e.457cf8",
+    "type": "catch",
+    "z": "ed224487.bbf838",
+    "name": "",
+    "scope": null,
+    "x": 1000,
+    "y": 660,
+    "wires": [
+      [
+        "f973cae9.9cec18"
+      ]
+    ]
+  },
+  {
+    "id": "b0bce68c.49fcd8",
+    "type": "function",
+    "z": "ed224487.bbf838",
+    "name": "CacheHttp",
+    "func": "if(msg.req)\n    flow.set(\"http\",msg);\nelse\n   flow.set(\"http\",null);\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 190,
+    "y": 240,
+    "wires": [
+      [
+        "1e0f82dd.2a103d"
+      ]
+    ]
+  },
+  {
+    "id": "f973cae9.9cec18",
+    "type": "function",
+    "z": "ed224487.bbf838",
+    "name": "buildResponse",
+    "func": "var http=flow.get(\"http\");\nif(!http)\n    return msg;\nhttp.payload = msg.payload;\nif(msg.payload.statusCode)\n    msg.statusCode=msg.payload.statusCode\nhttp.statusCode=msg.statusCode;\nreturn http;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 1140,
+    "y": 540,
+    "wires": [
+      [
+        "29cbf5ec.f1a6ca",
+        "356d2c58.d59534"
+      ]
+    ]
+  }
+]

@@ -24,7 +24,7 @@ module.exports = function (RED) {
                 action = config.zoneAction,
                 name = getParam(action, msg),
                 title = getTitle(action, name);
-            node.status({fill: "red", shape: "ring", text: "Retracting " + title});
+            node.status({fill: "red", shape: "ring", text: title});
             if (action === "Update" && !name)
                 node.send([null, {
                     topic: "error",
@@ -41,7 +41,7 @@ module.exports = function (RED) {
                     }]);
                 }, function (err) {
                     console.log("Itemsense error " + title, err);
-                    node.send([msg, {
+                    node.send([null, {
                         topic: "failure",
                         payload: lib.triageError(err, "Failed to " + title)
                     }]);
