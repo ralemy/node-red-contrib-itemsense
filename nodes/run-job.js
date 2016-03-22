@@ -42,9 +42,9 @@ module.exports = function (RED) {
 
         this.on("input", function (msg) {
             var itemSense = node.context().flow.get("itemsense");
-            if (msg.jobConfig)
-                Object.keys(msg.jobConfig).forEach(function (key) {
-                    jobObject[key] = msg.jobConfig[key];
+            if (msg.payload && msg.payload.jobConfig)
+                Object.keys(msg.payload.jobConfig).forEach(function (key) {
+                    jobObject[key] = msg.payload.jobConfig[key];
                 });
             node.status({fill: "red", shape: "ring", text: "calling ItemSense"});
             itemSense.jobs.start(jobObject).then(function (job) {
