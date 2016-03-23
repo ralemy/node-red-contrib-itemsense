@@ -4,7 +4,7 @@
         color: '#efeb6d',
         defaults: {
             name: {value: ""},
-            itemsense: {value: "", type: "itemsense-instance"},
+            itemsense: {value: "", type: "itemsense-instance", required:false},
             recipe: {value: ""},
             runLength: {value: 30, required: true},
             startDelay: {value: "PT0S", required: true},
@@ -114,7 +114,8 @@
 <script type="text/x-red" data-help-name="run-job">
     <h3>Starts a job on Itemsense</h3>
     <p> The Itemsense instance to start a job is extracted from the flow context "itemsense" key. the incoming message
-    can optionally have a <code>msg.jobConfig</code> object to modify the parameters of the job. If the message lacks a
+    can optionally have job parameters in <code>msg.payload</code> object to modify the parameters of the job.
+    If the <code>msg.payload</code> lacks a
     parameter, for example the recipe name, that parameter is taken from the config. the user needs to make sure that the
     parameters in the configuration tab will work with the incoming itemsense object if they are not explicitly specified
     in the input message.

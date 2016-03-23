@@ -1,11 +1,11 @@
 [
   {
     "type": "tab",
-    "id": "610039f7.4d9c18",
+    "id": "f2e46b1c.7f89d8",
     "label": "Dump Config For Running Job"
   },
   {
-    "id": "f125a1c4.1a66",
+    "id": "366f8ca6.f25194",
     "type": "itemsense-instance",
     "z": "",
     "url": "http://[replace with your itemsense instance url]/itemsense",
@@ -13,9 +13,9 @@
     "password": "[replace with your password]"
   },
   {
-    "id": "8a112055.adbb6",
+    "id": "cf266ab6.022e38",
     "type": "inject",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "Start",
     "topic": "trigger",
     "payload": "",
@@ -23,356 +23,407 @@
     "repeat": "",
     "crontab": "",
     "once": false,
-    "x": 90,
-    "y": 60,
+    "x": 110,
+    "y": 260,
     "wires": [
       [
-        "2ec282ee.7b377e"
+        "48a2f6a2.eae758"
       ]
     ]
   },
   {
-    "id": "220c5700.272e4a",
+    "id": "bc719f79.c3db",
     "type": "connect",
-    "z": "610039f7.4d9c18",
-    "itemsense": "f125a1c4.1a66",
+    "z": "f2e46b1c.7f89d8",
+    "itemsense": "366f8ca6.f25194",
     "name": "",
-    "x": 320,
-    "y": 60,
+    "x": 340,
+    "y": 260,
     "wires": [
       [
-        "c65235d3.5259c8"
+        "d955563.a2745a8",
+        "8251582e.ba57a8"
       ],
       []
     ]
   },
   {
-    "id": "c65235d3.5259c8",
+    "id": "d955563.a2745a8",
     "type": "filter-jobs",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "",
     "jobStatus": "RUNNING",
-    "x": 440,
-    "y": 140,
+    "x": 460,
+    "y": 340,
     "wires": [
       [
-        "5eb4116.8a125f"
+        "e9f7050.cb609f8"
       ],
       [
-        "de1d634f.ed387"
+        "736f6fd9.23e4"
       ]
     ]
   },
   {
-    "id": "5eb4116.8a125f",
+    "id": "e9f7050.cb609f8",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "forEach",
     "func": "if(msg.payload.length === undefined){\n    node.error({msg:\"Payload is not an Array\",payload:payload})\n    return;    \n}\nif(msg.payload.length===0){\n    node.send([null,{topic:\"failure\",payload:{statusCode:400, message:\"No Job Running\"}}]);\n    return;\n}\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn;",
     "outputs": "2",
     "noerr": 0,
-    "x": 540,
-    "y": 60,
+    "x": 560,
+    "y": 260,
     "wires": [
       [
-        "6002d9ab.922348",
-        "519b1960.89dbe8"
+        "7abc1a9d.3c2014",
+        "b35f0dbf.fd187"
       ],
       [
-        "de1d634f.ed387"
+        "736f6fd9.23e4"
       ]
     ]
   },
   {
-    "id": "519b1960.89dbe8",
+    "id": "b35f0dbf.fd187",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "aggregate Config",
     "func": "var config = flow.get(\"ConfigDump\") || {};\nif(!config[msg.topic])\n    config[msg.topic]=[];\nconfig[msg.topic].push(msg.payload);\nflow.set(\"ConfigDump\",config);\nmsg.topic = \"ConfigDump\";\nmsg.payload=config;\nreturn msg;",
     "outputs": "1",
     "noerr": 0,
     "x": 1010,
-    "y": 120,
+    "y": 340,
     "wires": [
       [
-        "fab7e42c.0eabd8"
+        "24dabafb.d65d16"
       ]
     ]
   },
   {
-    "id": "6002d9ab.922348",
+    "id": "7abc1a9d.3c2014",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "get Recipe Name",
-    "func": "msg.payload = {name:msg.payload.job.recipeName};\nreturn msg;",
+    "func": "msg.job = msg.payload;\nmsg.payload = {name:msg.payload.job.recipeName};\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
-    "x": 690,
-    "y": 140,
+    "x": 710,
+    "y": 340,
     "wires": [
       [
-        "a461107a.0fccd"
+        "e424ea6f.9e49d8"
       ]
     ]
   },
   {
-    "id": "a461107a.0fccd",
+    "id": "e424ea6f.9e49d8",
     "type": "get-object",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "",
     "objectType": "recipes",
-    "x": 410,
-    "y": 280,
+    "x": 430,
+    "y": 480,
     "wires": [
       [
-        "468cce16.1bcf7"
+        "7615bdba.93f0e4"
       ],
       []
     ]
   },
   {
-    "id": "a90c1299.d62f9",
+    "id": "3dd705b0.2eb0ea",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "get Reader Info",
-    "func": "var readerConfigs={}, \n    readerDefs = {},\n    r = msg.payload;\nif(r.readerConfigurationName)\n    readerConfigs[r.readerConfigurationName]=true;\nif(r.readerConfigurations)\n    Object.keys(r.readerConfigurations).forEach(function(reader){\n        readerDefs[reader]=true;\n        readerConfigs[r.readerConfigurations[reader]]=true;\n    });\nflow.set(\"ExpectedReaderConfigurations\",Object.keys(readerConfigs).length);    \nflow.set(\"ExpectedReaderDefinitions\",Object.keys(readerDefs).length);\nreturn [{\n    topic:\"Configurations\",\n    payload:Object.keys(readerConfigs).map(function(c){\n        return {name:c};\n    })\n},{\n    topic:\"Definitions\",\n    payload:Object.keys(readerDefs).map(function(c){\n        return {name:c};\n    })\n}];",
+    "func": "var readerConfigs={}, \n    readerDefs = {},\n    r = msg.payload;\nconsole.log(\"--->job\",msg.job);    \nif(r.readerConfigurationName){\n    readerConfigs[r.readerConfigurationName]=true;\n    msg.job.readerNames.forEach(function(reader){\n        readerDefs[reader]=true;\n    });\n}\nif(r.readerConfigurations)\n    Object.keys(r.readerConfigurations).forEach(function(reader){\n        readerDefs[reader]=true;\n        readerConfigs[r.readerConfigurations[reader]]=true;\n    });\nflow.set(\"ExpectedReaderConfigurations\",Object.keys(readerConfigs).length);    \nflow.set(\"ExpectedReaderDefinitions\",Object.keys(readerDefs).length);\nreturn [{\n    topic:\"Configurations\",\n    payload:Object.keys(readerConfigs).map(function(c){\n        return {name:c};\n    })\n},{\n    topic:\"Definitions\",\n    payload:Object.keys(readerDefs).map(function(c){\n        return {name:c};\n    })\n}];",
     "outputs": "2",
     "noerr": 0,
-    "x": 300,
-    "y": 500,
+    "x": 320,
+    "y": 700,
     "wires": [
       [
-        "4f164675.2f13f8"
+        "44a52fc1.7deb6"
       ],
       [
-        "106f7aa6.eaf135"
+        "329b6795.87eeb8"
       ]
     ]
   },
   {
-    "id": "c321c467.b932f8",
+    "id": "a08bdca1.d85ca",
     "type": "get-object",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "",
     "objectType": "readerConfigurations",
-    "x": 650,
-    "y": 420,
+    "x": 670,
+    "y": 620,
     "wires": [
       [
-        "66aeddf1.467744"
+        "e06f31a3.cdc85"
       ],
       []
     ]
   },
   {
-    "id": "4f164675.2f13f8",
+    "id": "44a52fc1.7deb6",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "forEach",
     "func": "if(msg.payload.length === undefined){\n    node.error(\"Payload is not an Array\")\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
     "outputs": "2",
     "noerr": 0,
-    "x": 440,
+    "x": 460,
+    "y": 640,
+    "wires": [
+      [
+        "a08bdca1.d85ca"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "329b6795.87eeb8",
+    "type": "function",
+    "z": "f2e46b1c.7f89d8",
+    "name": "forEach",
+    "func": "if(msg.payload.length === undefined){\n    node.error(\"Payload is not an Array\")\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
+    "outputs": "2",
+    "noerr": 0,
+    "x": 460,
+    "y": 760,
+    "wires": [
+      [
+        "c1162ae.c6c77d8"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "c1162ae.c6c77d8",
+    "type": "get-object",
+    "z": "f2e46b1c.7f89d8",
+    "name": "",
+    "objectType": "readerDefinitions",
+    "x": 680,
+    "y": 780,
+    "wires": [
+      [
+        "e06f31a3.cdc85"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "24dabafb.d65d16",
+    "type": "function",
+    "z": "f2e46b1c.7f89d8",
+    "name": "Wait for All Info",
+    "func": "var configDump = msg.payload;\nvar KeyVals={\n    Jobs:1,\n    recipes:1,\n    readerConfigurations:flow.get(\"ExpectedReaderConfigurations\"),\n    readerDefinitions:flow.get(\"ExpectedReaderDefinitions\")\n};\nvar shouldReturn = true;\nObject.keys(KeyVals).forEach(function(k){\n    console.log(k,KeyVals[k]);\n    if(!KeyVals[k])\n        return;\n    if(configDump[k])\n        if(configDump[k].length=== KeyVals[k])\n            return;\n    shouldReturn = false;        \n});\n\nreturn shouldReturn ? msg : undefined;\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 1080,
     "y": 440,
     "wires": [
       [
-        "c321c467.b932f8"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "106f7aa6.eaf135",
-    "type": "function",
-    "z": "610039f7.4d9c18",
-    "name": "forEach",
-    "func": "if(msg.payload.length === undefined){\n    node.error(\"Payload is not an Array\")\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
-    "outputs": "2",
-    "noerr": 0,
-    "x": 420,
-    "y": 560,
-    "wires": [
-      [
-        "9a6d134a.e3f86"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "9a6d134a.e3f86",
-    "type": "get-object",
-    "z": "610039f7.4d9c18",
-    "name": "",
-    "objectType": "readerDefinitions",
-    "x": 620,
-    "y": 580,
-    "wires": [
-      [
-        "66aeddf1.467744"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "fab7e42c.0eabd8",
-    "type": "function",
-    "z": "610039f7.4d9c18",
-    "name": "Wait for All Info",
-    "func": "var configDump = msg.payload;\nvar KeyVals={\n    Jobs:1,\n    recipes:1,\n    readerConfigurations:flow.get(\"ExpectedReaderConfigurations\"),\n    readerDefinitions:flow.get(\"ExpectedReaderDefinitions\")\n};\nvar shouldReturn = true;\nObject.keys(KeyVals).forEach(function(k){\n    console.log(k,KeyVals[k]);\n    if(configDump[k])\n        if(configDump[k].length=== KeyVals[k])\n            return;\n    shouldReturn = false;        \n});\n\nreturn shouldReturn ? msg : undefined;\n",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 1060,
-    "y": 240,
-    "wires": [
-      [
-        "b7464110.15598",
-        "3e4ae4f7.e82e7c"
+        "f16f0bbe.d89d88",
+        "997a1681.558428"
       ]
     ]
   },
   {
-    "id": "b7464110.15598",
+    "id": "f16f0bbe.d89d88",
     "type": "debug",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "",
     "active": true,
     "console": "false",
     "complete": "false",
-    "x": 1190,
-    "y": 40,
+    "x": 1210,
+    "y": 240,
     "wires": []
   },
   {
-    "id": "2ec282ee.7b377e",
+    "id": "48a2f6a2.eae758",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "Reset Flow Variables",
     "func": "flow.set(\"ConfigurationsDone\",null);\nflow.set(\"DefinitionsDone\",null);\nflow.set(\"ConfigDump\",null);\nflow.set(\"ExpectedReaderConfigurations\",-1);    \nflow.set(\"ExpectedReaderDefinitions\",-1);    \nreturn msg;",
     "outputs": 1,
     "noerr": 0,
-    "x": 130,
-    "y": 200,
+    "x": 150,
+    "y": 400,
     "wires": [
       [
-        "220c5700.272e4a"
+        "bc719f79.c3db"
       ]
     ]
   },
   {
-    "id": "468cce16.1bcf7",
+    "id": "7615bdba.93f0e4",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "forEach",
     "func": "if(msg.payload.length === undefined){\n    node.error(\"Payload is not an Array\")\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
     "outputs": "2",
     "noerr": 0,
-    "x": 320,
-    "y": 380,
+    "x": 340,
+    "y": 580,
     "wires": [
       [
-        "519b1960.89dbe8",
-        "a90c1299.d62f9"
+        "b35f0dbf.fd187",
+        "3dd705b0.2eb0ea"
       ],
       []
     ]
   },
   {
-    "id": "66aeddf1.467744",
+    "id": "e06f31a3.cdc85",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "forEach",
     "func": "if(msg.payload.length === undefined){\n    node.error({msg:\"Payload is not an Array\",payload:payload})\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
     "outputs": "2",
     "noerr": 0,
-    "x": 860,
-    "y": 500,
+    "x": 920,
+    "y": 700,
     "wires": [
       [
-        "519b1960.89dbe8"
+        "b35f0dbf.fd187"
       ],
       []
     ]
   },
   {
-    "id": "c6149d8a.a9da8",
+    "id": "4737c19f.d4a6e",
     "type": "http in",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "",
     "url": "/dump/job",
     "method": "post",
     "swaggerDoc": "",
-    "x": 110,
-    "y": 320,
+    "x": 130,
+    "y": 520,
     "wires": [
       [
-        "2ec282ee.7b377e",
-        "983143eb.54477"
+        "48a2f6a2.eae758",
+        "9fa20738.575e68"
       ]
     ]
   },
   {
-    "id": "1e57028d.3d123d",
+    "id": "1893b261.99cffe",
     "type": "http response",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "",
-    "x": 1090,
-    "y": 580,
+    "x": 1110,
+    "y": 780,
     "wires": []
   },
   {
-    "id": "983143eb.54477",
+    "id": "9fa20738.575e68",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "stash Http message",
     "func": "    flow.set(\"http\",msg);\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
-    "x": 230,
-    "y": 620,
+    "x": 250,
+    "y": 820,
     "wires": [
       []
     ]
   },
   {
-    "id": "3e4ae4f7.e82e7c",
+    "id": "997a1681.558428",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "Build Response",
     "func": "var http = flow.get(\"http\");\nif(!http) return;\nhttp.payload = msg.payload;\nif(msg.statusCode)\n    http.statusCode = msg.statusCode;\nreturn http;",
     "outputs": 1,
     "noerr": 0,
-    "x": 1130,
-    "y": 360,
+    "x": 1150,
+    "y": 560,
     "wires": [
       [
-        "1e57028d.3d123d"
+        "1893b261.99cffe"
       ]
     ]
   },
   {
-    "id": "de1d634f.ed387",
+    "id": "736f6fd9.23e4",
     "type": "function",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "Report Error",
     "func": "if(msg.topic !== \"failure\")\n    return;\nmsg.statusCode = msg.payload.statusCode;\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
-    "x": 780,
-    "y": 320,
+    "x": 830,
+    "y": 480,
     "wires": [
       [
-        "3e4ae4f7.e82e7c"
+        "997a1681.558428"
       ]
     ]
   },
   {
-    "id": "9c3c063a.e19e88",
+    "id": "9b231c0c.18ad6",
     "type": "comment",
-    "z": "610039f7.4d9c18",
+    "z": "f2e46b1c.7f89d8",
     "name": "How to use",
     "info": "In your Node-Red installation:\n```\nnpm install --save node-red-contrib-itemsense\n```\nThen post to /dump/job\nwith body:\n```\n{\n    itemsenseUrl:http://<the url of your instance>/itemsense.\n    username: <your username in the itemsense instance>\n    password: <your password>\n}\n```\nAltrnatively, you can configure the Connect Node Itemsense Instance and run the flow locally by clicking on the Start button",
-    "x": 280,
-    "y": 700,
+    "x": 150,
+    "y": 100,
     "wires": []
+  },
+  {
+    "id": "8251582e.ba57a8",
+    "type": "current-zone",
+    "z": "f2e46b1c.7f89d8",
+    "name": "",
+    "zoneAction": "Get",
+    "x": 580,
+    "y": 80,
+    "wires": [
+      [
+        "b35f0dbf.fd187",
+        "d8e31fcb.0f6ac"
+      ],
+      [
+        "736f6fd9.23e4"
+      ]
+    ]
+  },
+  {
+    "id": "d8e31fcb.0f6ac",
+    "type": "get-object",
+    "z": "f2e46b1c.7f89d8",
+    "name": "",
+    "objectType": "zoneMaps",
+    "x": 820,
+    "y": 60,
+    "wires": [
+      [
+        "a8a13c05.3a31b"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "a8a13c05.3a31b",
+    "type": "function",
+    "z": "f2e46b1c.7f89d8",
+    "name": "forEach",
+    "func": "if(msg.payload.length === undefined){\n    node.error({msg:\"Payload is not an Array\",payload:payload})\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
+    "outputs": "2",
+    "noerr": 0,
+    "x": 1000,
+    "y": 100,
+    "wires": [
+      [
+        "b35f0dbf.fd187"
+      ],
+      []
+    ]
   }
 ]
