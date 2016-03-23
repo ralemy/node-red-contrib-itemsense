@@ -6,6 +6,10 @@
     "type": "git",
     "url": "git+https://github.com/ralemy/node-red-contrib-itemsense.git"
   },
+  "scripts": {
+    "preversion":"git add -a",
+    "postversion":"git push && git push --tags && npm publish"
+  },
   "keywords": [
     "IoT",
     "RFID",
