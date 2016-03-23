@@ -7,3 +7,4 @@
 public/projects/*
 !public/projects/readme
 tests/experiments/*.log
+npm-debug.log
