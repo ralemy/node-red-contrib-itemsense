@@ -2,6 +2,9 @@
  * Created by ralemy on 3/20/16.
  * common functions for itemsense nodes
  */
+
+var _ = require("lodash");
+
 function stringify(target) {
     try {
         return typeof target === "object" ? JSON.stringify(target, null, " ") : target;
@@ -42,5 +45,8 @@ function padString(value, padcount, padchar) {
 module.exports = {
     stringify: stringify,
     triageError: triageError,
-    padString: padString
+    padString: padString,
+    merge:function(msg,newObj){
+        return _.merge({},msg,newObj);
+    }
 };

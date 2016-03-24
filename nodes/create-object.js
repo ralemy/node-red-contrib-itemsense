@@ -16,23 +16,20 @@ module.exports = function (RED) {
             node.status({fill: "red", shape: "ring", text: "Create or update " + config.objectType});
             itemSense[config.objectType].update(object).then(function (object) {
                 node.status({});
-                msg.payload = object;
-                msg.topic = config.objectType;
-                node.send([msg, {
-                    topic: "success",
-                    payload: "updated " + config.objectType,
-                    data: object
-                }]);
-            }, function (err) {
+                node.send([
+                    lib.merge(msg, {payload: object, topic: config.objectType}),
+                    lib.merge(msg, {
+                        topic: "success",
+                        payload: "updated " + config.objectType,
+                        data: object
+                    })]);
+            }).catch(function (err) {
                 console.log("Itemsense error updating " + config.objectType, err, object);
-                node.send([msg, {
+                node.error(err, lib.merge(msg, {
                     topic: "failure",
                     payload: lib.triageError(err, "Failed to update " + config.objectType),
                     data: object
-                }]);
-            }).catch(function (err) {
-                console.log("general error updating " + config.objectType, err, object);
-                node.error(err, {payload: err});
+                }));
             });
         });
     }

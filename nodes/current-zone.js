@@ -26,28 +26,30 @@ module.exports = function (RED) {
                 title = getTitle(action, name);
             node.status({fill: "red", shape: "ring", text: title});
             if (action === "Update" && !name)
-                node.send([null, {
-                    topic: "error",
-                    payload: {message: "input message does not have a zoneMapName property"}
-                }]);
+                node.error("input message does not have a zoneMapName property",
+                    lib.merge(msg, {
+                        topic: "error",
+                        payload: {statusCode: 400, message: "input message does not have a zoneMapName property"}
+                    }));
             else
                 itemSense.currentZoneMap[action.toLowerCase()](name).then(function (object) {
                     node.status({});
                     msg.payload = object;
                     msg.topic = "CurrentZoneMap";
-                    node.send([msg, {
-                        topic: "success",
-                        payload: title
-                    }]);
-                }, function (err) {
-                    console.log("Itemsense error " + title, err);
-                    node.send([null, {
-                        topic: "failure",
-                        payload: lib.triageError(err, "Failed to " + title)
-                    }]);
+                    node.send([
+                        lib.merge(msg, {payload: object, topic: "CurrentZoneMap"}),
+                        lib.merge(msg, {
+                            topic: "success",
+                            payload: title
+                        })]);
                 }).catch(function (err) {
-                    console.log("general error " + title, err);
-                    node.error(err, {payload: err});
+                    console.log("Itemsense error " + title, err);
+                    var payload = lib.triageError(err, "Failed to " + title);
+                    node.error(payload,
+                        lib.merge(msg, {
+                            topic: "failure",
+                            payload: payload
+                        }));
                 });
         });
     }

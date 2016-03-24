@@ -4,6 +4,7 @@
  */
 module.exports = function (RED) {
     "use strict";
+    var lib = require("./itemsense");
 
     function ConnectNode(config) {
         RED.nodes.createNode(this, config);
@@ -33,18 +34,19 @@ module.exports = function (RED) {
             else if (LocalItemsense)
                 itemsense = LocalItemsense.itemsense;
             else
-                node.send([null, {
-                    topic: "error",
-                    payload: "Must either configure an itemsense-instance or pass info in the message object"
-                }]);
-            msg.topic= "itemsense";
-            node.context().flow.set("itemsense",itemsense);
+                node.error("Must either configure an itemsense-instance or pass info in the message object",
+                    lib.merge(msg,{
+                        topic: "error",
+                        payload: "Must either configure an itemsense-instance or pass info in the message object"
+                    }));
+            node.context().flow.set("itemsense", itemsense);
             if (itemsense)
-                node.send([msg,
-                    {
+                node.send([
+                    lib.merge(msg,{topic:"itemsense"}),
+                    lib.merge(msg,{
                         topic: "success",
                         payload: "Connected to " + itemsense.itemsenseUrl
-                    }]);
+                    })]);
         });
     }
 

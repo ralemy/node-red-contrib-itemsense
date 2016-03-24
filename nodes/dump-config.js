@@ -4,13 +4,13 @@
  */
 module.exports = function (RED) {
     "use strict";
-    var lib = require("./itemsense");
+    var lib = require("./itemsense"),
+        q = require("q"),
+        _ = require("lodash");
 
     function DumpConfigNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this,
-            q = node.context().global.q,
-            _ = node.context().global.lodash;
+        var node = this;
 
         function dumpAllConfig(itemsense, msg) {
             var result = {
@@ -22,7 +22,7 @@ module.exports = function (RED) {
                 zoneMaps: null,
                 facilities: null,
                 currentZoneMaps: []
-            }
+            };
             return itemsense.recipes.getAll().then(function (recipes) {
                 result.recipes = recipes;
                 return itemsense.readerConfigurations.getAll();
@@ -109,10 +109,11 @@ module.exports = function (RED) {
             var itemSense = node.context().flow.get("itemsense");
             node.status({fill: "red", shape: "ring", text: "Dumping Configuration"});
             if (!itemSense)
-                node.send([null, {
-                    topic: "error",
-                    payload: {message: "No Itemsense instance defined", statusCode: 400}
-                }]);
+                node.error("No Itemsense instance defined",
+                    lib.merge(msg, {
+                        topic: "error",
+                        payload: {message: "No Itemsense instance defined", statusCode: 400}
+                    }));
             else if (config.dumpMode === "running")
                 itemSense.jobs.getAll().then(function (jobs) {
                     return _.filter(jobs, function (job) {
@@ -124,20 +125,20 @@ module.exports = function (RED) {
                             statusCode: 404,
                             message: "No Job running on instance " + itemSense.itemsenseUrl
                         });
-                }).then(function(jobs){
+                }).then(function (jobs) {
                     return q.all(_.map(jobs, function (job, index) {
-                        var copy = _.merge({},msg);
+                        var copy = _.merge({}, msg);
                         return dumpJobData(itemSense, job, msg, jobs.length, index).then(function (result) {
                             copy.payload = result;
                             node.send([copy, {
                                 topic: "success",
                                 payload: "Dumped objects related to running job " + job.id,
-                                count:jobs.length,
-                                index:index
+                                count: jobs.length,
+                                index: index
                             }]);
                         });
                     }));
-                }).then(function(){
+                }).then(function () {
                     node.status({});
                 }).catch(function (err) {
                     console.log("Error dumping running job", err);
