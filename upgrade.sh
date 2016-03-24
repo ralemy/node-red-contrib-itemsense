@@ -10,7 +10,7 @@ git commit -m "$1"
 
 if [ "$2" = "" ]
 then
-    echo npm version patch -m "$1"
+    npm version patch -m "$1"
     exit
 fi
 
