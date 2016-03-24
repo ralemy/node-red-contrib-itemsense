@@ -11,6 +11,36 @@ module.exports = function (RED) {
         var node = this,
             _ = node.context().global.lodash;
 
+        function sendOutput(config,msg){
+            var copy = _.merge({},msg),
+                mode = config.outputMode;
+            if(mode === "array")
+                node.send([msg, {
+                    topic: "success",
+                    payload: "Extracted " + msg.payload.length + " jobs with status " + config.jobStatus,
+                    jobStatus: config.jobStatus,
+                    count: msg.payload.length
+                }]);
+            else
+                _.each(msg.payload, function (object, index) {
+                    copy.payload = object;
+                    node.send([copy, {
+                        topic: "success",
+                        payload: "Retracted Job with status " + config.jobStatus,
+                        count: msg.payload.length,
+                        index: index + 1
+                    }]);
+                });
+            if (mode === "single" && msg.payload.length === 0)
+                node.send([null, {
+                    topic: "success",
+                    payload: "No Jobs found with status " + config.jobStatus,
+                    count: 0,
+                    index: 0
+                }]);
+
+        }
+
         this.on("input", function (msg) {
             var itemSense = node.context().flow.get("itemsense");
             node.status({fill: "yellow", shape: "ring", text: "getting running jobs"});
@@ -20,10 +50,7 @@ module.exports = function (RED) {
                 msg.payload = config.jobStatus === "ANY" ? jobs : _.filter(jobs, function (job) {
                     return job.status === config.jobStatus;
                 });
-                node.send([msg, {
-                    topic: "success",
-                    payload: "Extracted " + msg.payload.length + " jobs with status " + config.jobStatus
-                }]);
+                sendOutput(config,msg);
             }, function (err) {
                 console.log("general error getting jobs of status " + config.jobStatus, err);
                 node.send([null, {

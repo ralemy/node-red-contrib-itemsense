@@ -4,7 +4,8 @@
         color: '#efeb6d',
         defaults: {
             name: {value:""},
-            jobStatus: {value: "ANY"}
+            jobStatus: {value: "ANY"},
+            outputMode:{value:"array",required:true}
         },
         inputs:1,
         outputs:2,
@@ -14,9 +15,11 @@
         },
         oneditprepare: function () {
             $("#job-status").val(this.jobStatus);
+            $("#output-modes").val(this.outputMode);
         },
         oneditsave: function () {
             $("#node-input-jobStatus").val($("select#job-status option:selected").val());
+            $("#node-input-outputMode").val($("select#output-modes option:selected").val());
         }
     });
 </script>
@@ -38,16 +41,31 @@
         </select>
         <input type="hidden" id="node-input-jobStatus">
     </div>
+    <div class="form-row">
+        <label for="output-modes"><i class="fa fa-repeat"></i> Mode </label>
+        <select id="output-modes">
+            <option value="array" selected>Array</option>
+            <option value="single">Single Object</option>
+        </select>
+        <input type="hidden" id="node-input-outputMode">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="filter-jobs">
     <h3>Gets the Job currently having a specified status on an Itemsense instance</h3>
     <p> Reads the Itemsense object from the flow variable "itemsense", so it has to come after a connect node that sets that variable.</p>
-    <p> The first output contains the input message with <code>msg.payload</code> containing an array of the jobs with the specified
+    <p> When Mode is set to <code>Array</code>, the first output contains the input message with <code>msg.payload</code> containing an array of the jobs with the specified
     status. if there are no such jobs, <code>msg.payload</code> will contain an empty array. If desired status is <code>ANY</code>,
     it will return an array of all jobs.</p>
+    <p> When Mode is set to <code>Single Object</code>, the first output will fire once for every job with the specified
+    status, having that job in <code>msg.payload</code>. </p>
      <p> The second output is for logging and debugging, contains a
     <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
     of the operation.
     </p>
+    <p>the "success" message from the second output contains a <code>count</code> which contains the number of objects found in
+    the operation. in <code>Single Object</code> mode, it also contains an <code>index</code> which shows the index of the
+     object being sent in the first output.
+    </p>
+
 </script>

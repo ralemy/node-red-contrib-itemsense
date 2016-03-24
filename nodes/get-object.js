@@ -8,7 +8,35 @@ module.exports = function (RED) {
 
     function GetObjectNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this;
+        var node = this,
+            _ = node.context().global.lodash;
+
+        function sendOutput(mode, msg, title, name) {
+            var copy = _.merge({}, msg);
+            if (mode === "array")
+                node.send([msg, {
+                    topic: "success",
+                    payload: "Retracted " + title + (name ? "" : " (total: " + msg.payload.length + ")"),
+                    count: msg.payload.length
+                }]);
+            else
+                _.each(msg.payload, function (object, index) {
+                    copy.payload = object;
+                    node.send([copy, {
+                        topic: "success",
+                        payload: "Retracted " + title,
+                        count: msg.payload.length,
+                        index: index + 1
+                    }]);
+                });
+            if (mode === "single" && msg.payload.length === 0)
+                node.send([null, {
+                    topic: "success",
+                    payload: "No Object Found " + title,
+                    count: 0,
+                    index: 0
+                }]);
+        }
 
         this.on("input", function (msg) {
             var itemSense = node.context().flow.get("itemsense"),
@@ -20,15 +48,12 @@ module.exports = function (RED) {
                 node.status({});
                 msg.payload = name ? [object] : object;
                 msg.topic = config.objectType;
-                node.send([msg, {
-                    topic: "success",
-                    payload: "Retracted " + title + (name ? "" : "(total: " + msg.payload.length + ")")
-                }]);
+                sendOutput(config.outputMode, msg, title, name);
             }, function (err) {
-                console.log("Itemsense error get "+title, err);
+                console.log("Itemsense error get " + title, err);
                 node.send([msg, {
                     topic: "failure",
-                    payload: lib.triageError(err, "Failed to get "+title)
+                    payload: lib.triageError(err, "Failed to get " + title)
                 }]);
             }).catch(function (err) {
                 console.log("general error get " + title, err);
