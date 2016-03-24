@@ -1,0 +1,29 @@
+<script type="text/javascript">
+    RED.nodes.registerType('web-response',{
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "white-globe.png",
+        label: function() {
+            return this.name||"Build Response";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="web-response">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="web-response">
+    <h3>Builds a web response for an Itemsense flow</h3>
+    <p>To use standard **Http** nodes in Node-RED, the response node requires the same message that was passed in by
+    the request node. However, that message may be lost in the error-handling and iterative nodes, so this node must be
+    called in the error handling routines to construct a message and send it to the response node.</p>
+</script>

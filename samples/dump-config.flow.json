@@ -1,429 +1,139 @@
 [
   {
     "type": "tab",
-    "id": "f2e46b1c.7f89d8",
-    "label": "Dump Config For Running Job"
+    "id": "8c8d4b6f.9f26f8",
+    "label": "Dump Configuration"
   },
   {
-    "id": "366f8ca6.f25194",
-    "type": "itemsense-instance",
-    "z": "",
-    "url": "http://[replace with your itemsense instance url]/itemsense",
-    "user": "[replace with your user]",
-    "password": "[replace with your password]"
-  },
-  {
-    "id": "cf266ab6.022e38",
+    "id": "f8d2a00b.71cbd",
     "type": "inject",
-    "z": "f2e46b1c.7f89d8",
+    "z": "8c8d4b6f.9f26f8",
     "name": "Start",
-    "topic": "trigger",
+    "topic": "",
     "payload": "",
     "payloadType": "date",
     "repeat": "",
     "crontab": "",
     "once": false,
-    "x": 110,
-    "y": 260,
+    "x": 150,
+    "y": 120,
     "wires": [
       [
-        "48a2f6a2.eae758"
+        "9b144be4.0aadf8"
       ]
     ]
   },
   {
-    "id": "bc719f79.c3db",
+    "id": "9b144be4.0aadf8",
     "type": "connect",
-    "z": "f2e46b1c.7f89d8",
-    "itemsense": "366f8ca6.f25194",
+    "z": "8c8d4b6f.9f26f8",
+    "itemsense": "",
     "name": "",
-    "x": 340,
+    "x": 360,
+    "y": 180,
+    "wires": [
+      [
+        "4aecf09a.424a1"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "4aecf09a.424a1",
+    "type": "dump-config",
+    "z": "8c8d4b6f.9f26f8",
+    "name": "",
+    "dumpMode": "instance",
+    "x": 580,
     "y": 260,
     "wires": [
       [
-        "d955563.a2745a8",
-        "8251582e.ba57a8"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "d955563.a2745a8",
-    "type": "filter-jobs",
-    "z": "f2e46b1c.7f89d8",
-    "name": "",
-    "jobStatus": "RUNNING",
-    "x": 460,
-    "y": 340,
-    "wires": [
-      [
-        "e9f7050.cb609f8"
+        "61b49fb1.8cb75",
+        "8b07a4aa.542b88"
       ],
       [
-        "736f6fd9.23e4"
+        "8b07a4aa.542b88",
+        "61b49fb1.8cb75"
       ]
     ]
   },
   {
-    "id": "e9f7050.cb609f8",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "forEach",
-    "func": "if(msg.payload.length === undefined){\n    node.error({msg:\"Payload is not an Array\",payload:payload})\n    return;    \n}\nif(msg.payload.length===0){\n    node.send([null,{topic:\"failure\",payload:{statusCode:400, message:\"No Job Running\"}}]);\n    return;\n}\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn;",
-    "outputs": "2",
-    "noerr": 0,
-    "x": 560,
-    "y": 260,
-    "wires": [
-      [
-        "7abc1a9d.3c2014",
-        "b35f0dbf.fd187"
-      ],
-      [
-        "736f6fd9.23e4"
-      ]
-    ]
-  },
-  {
-    "id": "b35f0dbf.fd187",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "aggregate Config",
-    "func": "var config = flow.get(\"ConfigDump\") || {};\nif(!config[msg.topic])\n    config[msg.topic]=[];\nconfig[msg.topic].push(msg.payload);\nflow.set(\"ConfigDump\",config);\nmsg.topic = \"ConfigDump\";\nmsg.payload=config;\nreturn msg;",
-    "outputs": "1",
-    "noerr": 0,
-    "x": 1010,
-    "y": 340,
-    "wires": [
-      [
-        "24dabafb.d65d16"
-      ]
-    ]
-  },
-  {
-    "id": "7abc1a9d.3c2014",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "get Recipe Name",
-    "func": "msg.job = msg.payload;\nmsg.payload = {name:msg.payload.job.recipeName};\nreturn msg;",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 710,
-    "y": 340,
-    "wires": [
-      [
-        "e424ea6f.9e49d8"
-      ]
-    ]
-  },
-  {
-    "id": "e424ea6f.9e49d8",
-    "type": "get-object",
-    "z": "f2e46b1c.7f89d8",
-    "name": "",
-    "objectType": "recipes",
-    "x": 430,
-    "y": 480,
-    "wires": [
-      [
-        "7615bdba.93f0e4"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "3dd705b0.2eb0ea",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "get Reader Info",
-    "func": "var readerConfigs={}, \n    readerDefs = {},\n    r = msg.payload;\nconsole.log(\"--->job\",msg.job);    \nif(r.readerConfigurationName){\n    readerConfigs[r.readerConfigurationName]=true;\n    msg.job.readerNames.forEach(function(reader){\n        readerDefs[reader]=true;\n    });\n}\nif(r.readerConfigurations)\n    Object.keys(r.readerConfigurations).forEach(function(reader){\n        readerDefs[reader]=true;\n        readerConfigs[r.readerConfigurations[reader]]=true;\n    });\nflow.set(\"ExpectedReaderConfigurations\",Object.keys(readerConfigs).length);    \nflow.set(\"ExpectedReaderDefinitions\",Object.keys(readerDefs).length);\nreturn [{\n    topic:\"Configurations\",\n    payload:Object.keys(readerConfigs).map(function(c){\n        return {name:c};\n    })\n},{\n    topic:\"Definitions\",\n    payload:Object.keys(readerDefs).map(function(c){\n        return {name:c};\n    })\n}];",
-    "outputs": "2",
-    "noerr": 0,
-    "x": 320,
-    "y": 700,
-    "wires": [
-      [
-        "44a52fc1.7deb6"
-      ],
-      [
-        "329b6795.87eeb8"
-      ]
-    ]
-  },
-  {
-    "id": "a08bdca1.d85ca",
-    "type": "get-object",
-    "z": "f2e46b1c.7f89d8",
-    "name": "",
-    "objectType": "readerConfigurations",
-    "x": 670,
-    "y": 620,
-    "wires": [
-      [
-        "e06f31a3.cdc85"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "44a52fc1.7deb6",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "forEach",
-    "func": "if(msg.payload.length === undefined){\n    node.error(\"Payload is not an Array\")\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
-    "outputs": "2",
-    "noerr": 0,
-    "x": 460,
-    "y": 640,
-    "wires": [
-      [
-        "a08bdca1.d85ca"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "329b6795.87eeb8",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "forEach",
-    "func": "if(msg.payload.length === undefined){\n    node.error(\"Payload is not an Array\")\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
-    "outputs": "2",
-    "noerr": 0,
-    "x": 460,
-    "y": 760,
-    "wires": [
-      [
-        "c1162ae.c6c77d8"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "c1162ae.c6c77d8",
-    "type": "get-object",
-    "z": "f2e46b1c.7f89d8",
-    "name": "",
-    "objectType": "readerDefinitions",
-    "x": 680,
-    "y": 780,
-    "wires": [
-      [
-        "e06f31a3.cdc85"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "24dabafb.d65d16",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "Wait for All Info",
-    "func": "var configDump = msg.payload;\nvar KeyVals={\n    Jobs:1,\n    recipes:1,\n    readerConfigurations:flow.get(\"ExpectedReaderConfigurations\"),\n    readerDefinitions:flow.get(\"ExpectedReaderDefinitions\")\n};\nvar shouldReturn = true;\nObject.keys(KeyVals).forEach(function(k){\n    console.log(k,KeyVals[k]);\n    if(!KeyVals[k])\n        return;\n    if(configDump[k])\n        if(configDump[k].length=== KeyVals[k])\n            return;\n    shouldReturn = false;        \n});\n\nreturn shouldReturn ? msg : undefined;\n",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 1080,
-    "y": 440,
-    "wires": [
-      [
-        "f16f0bbe.d89d88",
-        "997a1681.558428"
-      ]
-    ]
-  },
-  {
-    "id": "f16f0bbe.d89d88",
+    "id": "61b49fb1.8cb75",
     "type": "debug",
-    "z": "f2e46b1c.7f89d8",
-    "name": "",
+    "z": "8c8d4b6f.9f26f8",
+    "name": "log output",
     "active": true,
     "console": "false",
-    "complete": "false",
-    "x": 1210,
-    "y": 240,
+    "complete": "true",
+    "x": 890,
+    "y": 200,
     "wires": []
   },
   {
-    "id": "48a2f6a2.eae758",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "Reset Flow Variables",
-    "func": "flow.set(\"ConfigurationsDone\",null);\nflow.set(\"DefinitionsDone\",null);\nflow.set(\"ConfigDump\",null);\nflow.set(\"ExpectedReaderConfigurations\",-1);    \nflow.set(\"ExpectedReaderDefinitions\",-1);    \nreturn msg;",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 150,
-    "y": 400,
-    "wires": [
-      [
-        "bc719f79.c3db"
-      ]
-    ]
-  },
-  {
-    "id": "7615bdba.93f0e4",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "forEach",
-    "func": "if(msg.payload.length === undefined){\n    node.error(\"Payload is not an Array\")\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
-    "outputs": "2",
-    "noerr": 0,
-    "x": 340,
-    "y": 580,
-    "wires": [
-      [
-        "b35f0dbf.fd187",
-        "3dd705b0.2eb0ea"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "e06f31a3.cdc85",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "forEach",
-    "func": "if(msg.payload.length === undefined){\n    node.error({msg:\"Payload is not an Array\",payload:payload})\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
-    "outputs": "2",
-    "noerr": 0,
-    "x": 920,
-    "y": 700,
-    "wires": [
-      [
-        "b35f0dbf.fd187"
-      ],
-      []
-    ]
-  },
-  {
-    "id": "4737c19f.d4a6e",
+    "id": "519d5245.3ce3ac",
     "type": "http in",
-    "z": "f2e46b1c.7f89d8",
+    "z": "8c8d4b6f.9f26f8",
     "name": "",
-    "url": "/dump/job",
-    "method": "post",
+    "url": "/dump",
+    "method": "get",
     "swaggerDoc": "",
-    "x": 130,
-    "y": 520,
-    "wires": [
-      [
-        "48a2f6a2.eae758",
-        "9fa20738.575e68"
-      ]
-    ]
-  },
-  {
-    "id": "1893b261.99cffe",
-    "type": "http response",
-    "z": "f2e46b1c.7f89d8",
-    "name": "",
-    "x": 1110,
-    "y": 780,
-    "wires": []
-  },
-  {
-    "id": "9fa20738.575e68",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "stash Http message",
-    "func": "    flow.set(\"http\",msg);\nreturn msg;",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 250,
-    "y": 820,
-    "wires": [
-      []
-    ]
-  },
-  {
-    "id": "997a1681.558428",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "Build Response",
-    "func": "var http = flow.get(\"http\");\nif(!http) return;\nhttp.payload = msg.payload;\nif(msg.statusCode)\n    http.statusCode = msg.statusCode;\nreturn http;",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 1150,
-    "y": 560,
-    "wires": [
-      [
-        "1893b261.99cffe"
-      ]
-    ]
-  },
-  {
-    "id": "736f6fd9.23e4",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "Report Error",
-    "func": "if(msg.topic !== \"failure\")\n    return;\nmsg.statusCode = msg.payload.statusCode;\nreturn msg;",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 830,
+    "x": 160,
     "y": 480,
     "wires": [
       [
-        "997a1681.558428"
+        "917f7a2c.089618"
       ]
     ]
   },
   {
-    "id": "9b231c0c.18ad6",
-    "type": "comment",
-    "z": "f2e46b1c.7f89d8",
-    "name": "How to use",
-    "info": "In your Node-Red installation:\n```\nnpm install --save node-red-contrib-itemsense\n```\nThen post to /dump/job\nwith body:\n```\n{\n    itemsenseUrl:http://<the url of your instance>/itemsense.\n    username: <your username in the itemsense instance>\n    password: <your password>\n}\n```\nAltrnatively, you can configure the Connect Node Itemsense Instance and run the flow locally by clicking on the Start button",
-    "x": 150,
-    "y": 100,
+    "id": "ec7480.50b3fb8",
+    "type": "http response",
+    "z": "8c8d4b6f.9f26f8",
+    "name": "Return Http Response",
+    "x": 1080,
+    "y": 280,
     "wires": []
   },
   {
-    "id": "8251582e.ba57a8",
-    "type": "current-zone",
-    "z": "f2e46b1c.7f89d8",
-    "name": "",
-    "zoneAction": "Get",
-    "x": 580,
-    "y": 80,
+    "id": "8b07a4aa.542b88",
+    "type": "function",
+    "z": "8c8d4b6f.9f26f8",
+    "name": "Build Response",
+    "func": "if(msg.req)\n    return msg;\nif(msg.topic !== \"failure\")\n    return;\nvar http = flow.get(\"http\");\nif(!http)\n    return;\nhttp.statusCode = msg.payload.statusCode;    \nhttp.payload =msg.payload;\nreturn http;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 860,
+    "y": 360,
     "wires": [
       [
-        "b35f0dbf.fd187",
-        "d8e31fcb.0f6ac"
-      ],
-      [
-        "736f6fd9.23e4"
+        "ec7480.50b3fb8"
       ]
     ]
   },
   {
-    "id": "d8e31fcb.0f6ac",
-    "type": "get-object",
-    "z": "f2e46b1c.7f89d8",
-    "name": "",
-    "objectType": "zoneMaps",
-    "x": 820,
-    "y": 60,
+    "id": "917f7a2c.089618",
+    "type": "function",
+    "z": "8c8d4b6f.9f26f8",
+    "name": "Stash Http message",
+    "func": "flow.set(\"http\",msg);\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 200,
+    "y": 320,
     "wires": [
       [
-        "a8a13c05.3a31b"
-      ],
-      []
+        "9b144be4.0aadf8"
+      ]
     ]
   },
   {
-    "id": "a8a13c05.3a31b",
-    "type": "function",
-    "z": "f2e46b1c.7f89d8",
-    "name": "forEach",
-    "func": "if(msg.payload.length === undefined){\n    node.error({msg:\"Payload is not an Array\",payload:payload})\n    return;    \n}\n\nvar copy = {}\nObject.keys(msg).forEach(function(key){\n    copy[key]=msg[key];\n});\nmsg.payload.forEach(function(payload){\n    copy.payload = payload;\n    node.send([copy,null]);\n});\nreturn[null,{topic:msg.topic, payload:\"Done\"}];",
-    "outputs": "2",
-    "noerr": 0,
-    "x": 1000,
-    "y": 100,
-    "wires": [
-      [
-        "b35f0dbf.fd187"
-      ],
-      []
-    ]
+    "id": "f4cd3826.778e68",
+    "type": "comment",
+    "z": "8c8d4b6f.9f26f8",
+    "name": "How to Run",
+    "info": "<h3>Dumps the configuration of an Itemsene Instance or running job</h3>configure the **Connect** node to point to your ItemSense Instance, then deploy the flow and either click the button next to **Start** node or call the /dump endpoint on your Node-RED installation.\nyou can change the configuration of the **Dump Configuration** node to dump the whole instance configuration or just the objects related to the running job.",
+    "x": 160,
+    "y": 40,
+    "wires": []
   }
 ]
