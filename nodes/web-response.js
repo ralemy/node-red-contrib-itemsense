@@ -14,7 +14,7 @@ module.exports = function (RED) {
             if (http && msg.topic === "failure") {
                 http.payload = msg.payload;
                 http.statusCode = msg.statusCode;
-                return http;
+                node.send(http);
             }
         });
     }

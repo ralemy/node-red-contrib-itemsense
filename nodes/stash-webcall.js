@@ -12,7 +12,7 @@ module.exports = function (RED) {
         this.on("input", function (msg) {
             if(msg.req)
                 node.context().flow.set("Itemsense_http",msg);
-            return msg;
+            node.send(msg);
         });
     }
 
