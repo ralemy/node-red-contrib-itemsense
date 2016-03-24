@@ -1,0 +1,53 @@
+<script type="text/javascript">
+    RED.nodes.registerType('dump-config', {
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            name: {value: ""},
+            dumpMode: {value: "running", required: true}
+        },
+        inputs: 1,
+        outputs: 2,
+        icon: "impinj.png",
+        label: function () {
+            return this.name || "Dump Configuration for " + (this.dumpMode === "running" ? "running job" : " instance");
+        },
+        oneditprepare: function () {
+            $("#dump-modes").val(this.dumpMode);
+        },
+        oneditsave: function () {
+            $("#node-input-dumpMode").val($("select#dump-modes option:selected").val());
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="dump-config">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="dump-modes"><i class="fa fa-repeat"></i> Mode </label>
+        <select id="dump-modes">
+            <option value="running" selected>Running Job</option>
+            <option value="instance">Instance</option>
+        </select>
+        <input type="hidden" id="node-input-dumpMode">
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="dump-config">
+    <h3>Dumps the configuration of the running itemsense job</h3>
+    <p>Reads the Itemsense instance from the "itemsense" variable of the flow context, such as one created by a
+    connect node.</p>
+    <p> When Mode is set to "Running Job", it dumps the objects for the job, recipe, and the relevant reader configurations, reader definitions, and
+    current zone map; and if the current zone map is set, the zone map information is also dumped.</p>
+    <p> When Mode is set to "Instance", it dumps the recipes, reader configurations, reader definitions, zone maps,
+    facilities, and the current zone map for each facility.</p>
+    <p>The <code>msg.payload</code> of the first output contains Object that has a key for each dumped entity, if the operation succeeds.</p>
+    <p> The second output is for logging and debugging, contains a
+    <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
+    of the operation.</p>
+
+</script>

@@ -10,11 +10,11 @@ function stringify(target) {
     }
 }
 
-function getMessage(err){
+function getMessage(err) {
     if (err.response)
         if (err.response.body)
             if (err.response.body.message)
-                return  err.response.body.message;
+                return err.response.body.message;
             else
                 return stringify(err.response.body);
     if (err.error)
@@ -26,8 +26,7 @@ function getMessage(err){
 function triageError(err, title) {
     var payload = {};
     payload.title = title || "Error";
-    if (err.statusCode)
-        payload.statusCode = err.statusCode;
+    payload.statusCode = err.statusCode || 500;
     payload.message = getMessage(err);
     return payload;
 }
