@@ -65,7 +65,8 @@
     <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
     of the operation.</p>
     <p>the "success" message from the second output contains a <code>count</code> which contains the number of objects found in
-    the operation. in <code>Single Object</code> mode, it also contains an <code>index</code> which shows the index of the
-     object being sent in the first output.
-    </p>
+    the operation. in <code>Single Object</code> mode, the <code>payload</code> of both first and second outputs contain
+     an <code>index</code> which shows the index of the
+     object being sent in the first output, and a <code>count</code> property that shows how many objects are in the collection
+     in total.</p>
 </script>

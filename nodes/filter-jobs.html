@@ -64,8 +64,10 @@
     of the operation.
     </p>
     <p>the "success" message from the second output contains a <code>count</code> which contains the number of objects found in
-    the operation. in <code>Single Object</code> mode, it also contains an <code>index</code> which shows the index of the
-     object being sent in the first output.
+    the operation.
+    <p>In <code>Single Object</code> mode, the <code>msg.payload</code> of both first and second output contain an
+     <code>index</code> which shows the index of the object being sent in the first output, and a <code>count</code>
+     property which shows how many jobs were found with the specified status</p>
     </p>
 
 </script>
