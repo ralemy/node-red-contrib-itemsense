@@ -4,7 +4,8 @@
  */
 module.exports = function (RED) {
     "use strict";
-    var lib = require("./itemsense");
+    var lib = require("./itemsense"),
+        Itemsense = require("itemsense-node");
 
     function ConnectNode(config) {
         RED.nodes.createNode(this, config);
@@ -16,7 +17,7 @@ module.exports = function (RED) {
         }
 
         function getItemsense(msg) {
-            var Factory = node.context().global.ItemSense,
+            var Factory = Itemsense,
                 instance = new Factory({
                     itemsenseUrl: msg.itemsenseUrl,
                     username: msg.username,
@@ -33,22 +34,23 @@ module.exports = function (RED) {
                 itemsense = getItemsense(msg.payload);
             else if (LocalItemsense)
                 itemsense = LocalItemsense.itemsense;
-            else
+            else {
                 node.error("Must either configure an itemsense-instance or pass info in the message object",
-                    lib.merge(msg,{
+                    lib.extend(msg, {
                         topic: "error",
-                        payload: "Must either configure an itemsense-instance or pass info in the message object"
+                        payload: "Must either configure an itemsense-instance or pass info in the message object",
+                        statusCode: 400
                     }));
+                return;
+            }
             node.context().flow.set("itemsense", itemsense);
             if (itemsense)
-                node.send([
-                    lib.merge(msg,{topic:"itemsense"}),
-                    lib.merge(msg,{
+                node.send([msg,
+                    {
                         topic: "success",
                         payload: "Connected to " + itemsense.itemsenseUrl
-                    })]);
+                    }]);
         });
     }
-
     RED.nodes.registerType("connect", ConnectNode);
 };

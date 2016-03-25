@@ -43,7 +43,7 @@
     <p>The node parameters can be passed to it using <code>msg.payload</code>, i.e. in an object that has keys for
     <code>fromZone, toZone, and/or epc</code>. if msg.payload does not contain a parameter, that parameter is read
     from the node configuration. All parameters are optional.</p>
-    <p> The first output will have the registered queue and server url</p>
+    <p> The first output will emit a message once the queue is listening. this is usually used to start a job.</p>
     <p> The second output will be fired at each message arrival. it will have a <code>msg.topic="AMQPMessage"</code> and
     the message will be in <code>msg.payload</code>. </p>
         <p> The third output is for logging and debugging, contains a

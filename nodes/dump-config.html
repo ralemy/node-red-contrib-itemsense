@@ -10,7 +10,12 @@
         outputs: 2,
         icon: "impinj.png",
         label: function () {
-            return this.name || "Dump Configuration for " + (this.dumpMode === "running" ? "running job" : " instance");
+            var titles = {
+                running : "Running Job",
+                specific: "Specific Job",
+                instance: 'Instance'
+            };
+            return this.name || "Dump Configuration for " + titles[this.dumpMode];
         },
         oneditprepare: function () {
             $("#dump-modes").val(this.dumpMode);
@@ -30,6 +35,7 @@
         <label for="dump-modes"><i class="fa fa-repeat"></i> Mode </label>
         <select id="dump-modes">
             <option value="running" selected>Running Job</option>
+            <option value="specific" selected>Specific Job</option>
             <option value="instance">Instance</option>
         </select>
         <input type="hidden" id="node-input-dumpMode">
@@ -43,6 +49,9 @@
     connect node.</p>
     <p> When Mode is set to "Running Job", it dumps the objects for the job, recipe, and the relevant reader configurations, reader definitions, and
     current zone map; and if the current zone map is set, the zone map information is also dumped.</p>
+    <p> When Mode is set to "Specific Job", it dumps the same config but for the job whose id is found in
+    <code>msg.payload.id</code>
+    </p>
     <p> When Mode is set to "Instance", it dumps the recipes, reader configurations, reader definitions, zone maps,
     facilities, and the current zone map for each facility.</p>
     <p>The <code>msg.payload</code> of the first output contains Object that has a key for each dumped entity, if the operation succeeds.</p>

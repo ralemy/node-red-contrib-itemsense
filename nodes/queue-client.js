@@ -4,18 +4,19 @@
  */
 module.exports = function (RED) {
     "use strict";
+    var lib = require("./itemsense"),
+        q = require("q"),
+        amqp = require("amqp"),
+        _ = require("lodash"),
+        Decoder = require("string_decoder").StringDecoder,
+        decoder = new Decoder("utf8");
 
     function QueueClientNode(config) {
         RED.nodes.createNode(this, config);
         var node = this,
-            _ = node.context().global.lodash,
-            amqp = node.context().global.amqp,
-            q = node.context().global.q,
-            decoder = new (node.context().global.StringDecoder)("utf8"),
             connection = null,
             errorListener = null,
-            nodeClosing = false,
-            lib = require("./itemsense.js");
+            nodeClosing = false;
 
         function getQueueParameters(payload) {
             return _.reduce(["toZone", "fromZone", "epc"], function (r, k) {
@@ -60,19 +61,20 @@ module.exports = function (RED) {
                     arguments: {"x-expires": 3600000, "x-message-ttl": 3600000, "x-max-length-bytes": 1073741824}
                 }, function (store) {
                     defer.notify({
-                        type: "log",
-                        body: {topic: "success", payload: "Queue Ready, listening for messages", queue: queue}
+                        type: "ready",
+                        body: {topic: "message ready", payload: "Queue Ready, listening for messages", queue: queue}
                     });
                     store.subscribe(function (msg) {
                         defer.notify(consumeMessage(msg));
-                    }).addCallback(function(ok){
-                        connection.on("close",function(){
+                    }).addCallback(function (ok) {
+                        connection.on("close", function () {
                             store.unsubscribe(ok.consumerTag);
                         });
                     });
                 });
             });
-            errorListener =function (err) {
+            errorListener = function (err) {
+                console.log("Error in AMQP Listener", err);
                 defer.notify({
                     type: "log",
                     body: {topic: "error", payload: "Error in AMQP connection", error: err}
@@ -86,8 +88,8 @@ module.exports = function (RED) {
         }
 
         function closeConnection(newConnection) {
-            if (connection){
-                connection.removeListener("error",errorListener);
+            if (connection) {
+                connection.removeListener("error", errorListener);
                 connection.disconnect();
             }
             connection = newConnection;
@@ -95,47 +97,41 @@ module.exports = function (RED) {
 
         this.on("input", function (msg) {
             node.status({fill: "yellow", shape: "ring", text: "Registering Queue"});
-            var itemSense = node.context().flow.get("itemsense"),
+            var itemSense = lib.getItemSense(node, msg),
                 channelQP = getQueueParameters(msg.payload || {});
-            if (msg.topic === "CloseConnection"){
+            if (msg.topic === "CloseConnection")
                 closeConnection();
-            }
-            else
+            else if (itemSense)
                 itemSense.messageQueue.configure(channelQP).then(function (channel) {
-                    node.status({fill:"green",shape:"ring",text:"waiting for messages"});
-                    msg.payload = channel;
-                    msg.topic = "AMQPQueue";
-                    node.send([msg, null, {topic: "success", payload: "AMQP Queue Opened.", queue: channel}]);
+                    node.status({fill: "green", shape: "ring", text: "waiting for messages"});
+                    node.send([null, null, {topic: "success", payload: "AMQP Queue Opened.", queue: channel}]);
                     return consumeQueue(amqp.createConnection({
                         url: channel.serverUrl,
                         login: itemSense.username,
                         password: itemSense.password
-                    }), channel.queue);
-                }, function (err) {
-                    node.send([null, null, {
-                        topic: "error",
-                        payload: lib.triageError(err, "Failed registering to AMQP")
-                    }]);
+                    }, {reconnect: false}), channel.queue);
                 }).then(function () {
-                    if(!nodeClosing)
-                        node.send([null, null, {topic: "success", payload: "connection closed"}]);
+                    node.status({});
+                    if (!nodeClosing) {
+                        msg.payload = "connection closed";
+                        node.send([msg, null, {topic: "success", payload: "connection closed"}]);
+                    }
                 }, null, function (message) {
                     if (message.type === "log")
                         node.send([null, null, message.body]);
+                    else if (message.type === "ready")
+                        node.send([lib.extend(msg, message.body), null, message.body]);
                     else
-                        node.send([null, message.body, {
+                        node.send([null, lib.extend(msg, message.body), {
                             topic: "message",
                             payload: "AMQP Message Received",
                             AMQPmessage: message.body
                         }]);
                 }).catch(function (err) {
-                    console.log("general error in AMQP ",err,node);
-                    node.error(err, err);
-                }).finally(function () {
-                    node.status({});
+                    lib.throwNodeError(err, "Error in  AMQP", msg, node);
                 });
         });
-        node.on("close", function(){
+        node.on("close", function () {
             nodeClosing = true;
             closeConnection();
         });

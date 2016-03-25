@@ -4,24 +4,28 @@
  */
 module.exports = function (RED) {
     "use strict";
-    var lib = require("./itemsense");
+    var lib = require("./itemsense"),
+        _ = require("lodash");
 
     function GetObjectNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this,
-            _ = node.context().global.lodash;
+        var node = this;
 
         function sendOutput(mode, msg, title, name) {
-            var copy = _.merge({}, msg);
+            var copy = _.extend({}, msg);
             if (mode === "array")
                 node.send([msg, {
                     topic: "success",
                     payload: "Retracted " + title + (name ? "" : " (total: " + msg.payload.length + ")"),
                     count: msg.payload.length
                 }]);
-            else
+            else if (msg.payload.length)
                 _.each(msg.payload, function (object, index) {
-                    copy.payload = object;
+                    copy.payload = {
+                        target: object || {},
+                        index: index + 1,
+                        count: msg.payload.length
+                    };
                     node.send([copy, {
                         topic: "success",
                         payload: "Retracted " + title,
@@ -29,36 +33,37 @@ module.exports = function (RED) {
                         index: index + 1
                     }]);
                 });
-            if (mode === "single" && msg.payload.length === 0)
-                node.send([null, {
+            else {
+                copy.payload = {
+                    target: null,
+                    count: 0,
+                    index: 0
+                };
+                node.send([copy, {
                     topic: "success",
                     payload: "No Object Found " + title,
                     count: 0,
                     index: 0
                 }]);
+            }
         }
 
         this.on("input", function (msg) {
-            var itemSense = node.context().flow.get("itemsense"),
+            var itemSense = lib.getItemSense(node, msg),
                 name = msg.payload ? msg.payload.name : null,
                 action = name ? "get" : "getAll",
                 title = (name ? name + " from" : "all") + " " + config.objectType;
             node.status({fill: "red", shape: "ring", text: "Retracting " + title});
-            itemSense[config.objectType][action](name).then(function (object) {
-                node.status({});
-                msg.payload = name ? [object] : object;
-                msg.topic = config.objectType;
-                sendOutput(config.outputMode, msg, title, name);
-            }, function (err) {
-                console.log("Itemsense error get " + title, err);
-                node.send([msg, {
-                    topic: "failure",
-                    payload: lib.triageError(err, "Failed to get " + title)
-                }]);
-            }).catch(function (err) {
-                console.log("general error get " + title, err);
-                node.error(err, {payload: err});
-            });
+            if (itemSense)
+                itemSense[config.objectType][action](name).then(function (object) {
+                    node.status({});
+                    msg.payload = name ? [object] : object;
+                    msg.topic = config.objectType;
+                    sendOutput(config.outputMode, msg, title, name);
+                }).catch(function (err) {
+                    var title = "Itemsense error get " + title;
+                    lib.throwNodeError(err,title,msg,node);
+                });
         });
     }
 

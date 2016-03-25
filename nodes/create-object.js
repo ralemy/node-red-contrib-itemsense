@@ -11,26 +11,24 @@ module.exports = function (RED) {
         var node = this;
 
         this.on("input", function (msg) {
-            var itemSense = node.context().flow.get("itemsense"),
+            var itemsense = lib.getItemSense(node,msg),
                 object = typeof msg.payload === "object" ? msg.payload : null;
             node.status({fill: "red", shape: "ring", text: "Create or update " + config.objectType});
-            itemSense[config.objectType].update(object).then(function (object) {
-                node.status({});
-                node.send([
-                    lib.merge(msg, {payload: object, topic: config.objectType}),
-                    lib.merge(msg, {
-                        topic: "success",
-                        payload: "updated " + config.objectType,
-                        data: object
-                    })]);
-            }).catch(function (err) {
-                console.log("Itemsense error updating " + config.objectType, err, object);
-                node.error(err, lib.merge(msg, {
-                    topic: "failure",
-                    payload: lib.triageError(err, "Failed to update " + config.objectType),
-                    data: object
-                }));
-            });
+            if (itemsense)
+                itemsense[config.objectType].update(object).then(function (object) {
+                    node.status({});
+                    node.send([
+                        lib.extend(msg, {payload: object, topic: config.objectType}),
+                        {
+                            topic: "success",
+                            payload: "updated " + config.objectType,
+                            data: object
+                        }]);
+                }).catch(function (err) {
+                    var title = "Itemsense error updating " + config.objectType;
+                    lib.throwNodeError(err,title,msg,node);
+                    console.log("Itemsense error updating " + config.objectType, object);
+                });
         });
     }
 

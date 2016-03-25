@@ -11,41 +11,38 @@ module.exports = function (RED) {
         var node = this;
 
         this.on("input", function (msg) {
-            var itemSense = node.context().flow.get("itemsense"),
+            var itemSense = lib.getItemSense(node, msg),
                 name = msg.payload ? msg.payload.name : null;
             node.status({fill: "red", shape: "ring", text: "delete " + name + " from " + config.objectType});
-            if (!name)
-                node.error("No name provided in payload.name",
-                    lib.merge(msg, {
-                        payload: {statusCode: 400, message: "No name provided in payload.name"},
-                        topic: "error"
-                    }));
-            else if (itemSense[config.objectType].delete)
-                itemSense[config.objectType].delete(name).then(function (object) {
-                    node.status({});
-                    node.send([
-                        lib.merge(msg, {payload: object || {}, topic: config.objectType}),
-                        lib.merge(msg, {
-                            topic: "success",
-                            payload: "deleted " + name + " from " + config.objectType,
-                            data: object
-                        })]);
-                }).catch(function (err) {
-                    console.log("Itemsense error deleting " + name + " from " + config.objectType, err);
-                    var payload = lib.triageError(err, "Failed to delete " + name + " from " + config.objectType);
-                    node.error(payload,
-                        lib.merge(msg, {
-                            topic: "failure",
-                            payload: payload,
-                            data: object
+            if (itemSense)
+                if (!name)
+                    node.error("No name provided in payload.name",
+                        lib.extend(msg, {
+                            payload: "No name provided in payload.name",
+                            statusCode: 400,
+                            topic: "error"
                         }));
-                });
-            else
-                node.error(config.objectType + " does not support delete action",
-                    lib.merge(msg, {
-                        topic: "error",
-                        payload: {message: config.objectType + " does not support delete action", statusCode: 400}
-                    }));
+                else if (itemSense[config.objectType].delete)
+                    itemSense[config.objectType].delete(name).then(function (object) {
+                        node.status({});
+                        node.send([
+                            lib.extend(msg, {payload: object || {}, topic: config.objectType}),
+                            {
+                                topic: "success",
+                                payload: "deleted " + name + " from " + config.objectType,
+                                data: object
+                            }]);
+                    }).catch(function (err) {
+                        var title = "Itemsense error deleting " + name + " from " + config.objectType;
+                        lib.throwNodeError(err, title, msg, node);
+                    });
+                else
+                    node.error(config.objectType + " does not support delete action",
+                        lib.extend(msg, {
+                            topic: "error",
+                            payload: config.objectType + " does not support delete action",
+                            statuCode: 400
+                        }));
         });
     }
 

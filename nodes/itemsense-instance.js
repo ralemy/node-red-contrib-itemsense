@@ -4,11 +4,12 @@
  */
 module.exports = function (RED) {
     "use strict";
+    var ItemSense = require("itemsense-node");
 
     function ItemsenseInstanceNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this,
-            ItemSense = require("itemsense-node");
+        var node = this;
+            
         node.itemsense = new ItemSense({
             itemsenseUrl:config.url,
             username: config.user,

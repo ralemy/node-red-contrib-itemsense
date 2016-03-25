@@ -3,7 +3,8 @@
  * common functions for itemsense nodes
  */
 
-var _ = require("lodash");
+var _ = require("lodash"),
+    q = require("q");
 
 function stringify(target) {
     try {
@@ -42,11 +43,77 @@ function padString(value, padcount, padchar) {
     return p + s;
 }
 
+function getProgress(config, value) {
+    if (config.repeat == "None")
+        return "complete";
+    if (config.repeat === "Indefinitely")
+        return "Call: " + padString(-1 * value, 2, "0");
+    value -= 1;
+    if (!value)
+        return "complete";
+    value *= 100;
+    value /= parseInt(config.count);
+    value = Math.round(100 - value);
+    return padString(value, 2, "0") + "%";
+}
+
+function extend(msg,newObj){
+    return _.extend({},msg,newObj);
+}
+
+function throwNodeError(err,title, msg,node){
+    console.log(title, err);
+    var payload = triageError(err, title);
+    node.error(payload,
+        extend(msg, {
+            topic: "failure",
+            payload: payload,
+            statusCode: payload.statusCode
+        }));
+}
+
+function getItemSense(node,msg){
+    var itemSense = node.context().flow.get("itemsense");
+    if(!itemSense)
+        node.error("Itemsense Instance flow variable absent. use a connect node",
+            extend(msg, {
+                topic: "failure",
+                payload: "Itemsense flow variable absent",
+                statusCode: 500
+            }));
+    return itemSense;
+}
+
+function terminateLoop(node, msg, interval) {
+    var copy = extend(msg,{
+        payload:{
+            items:[],
+            nextPageMarker:null,
+            progress:"interrupted"
+        }
+    })
+    node.status({});
+    if (!interval)
+        node.send([copy, {
+            topic: "warning",
+            payload: "No interval to terminate"
+        }]);
+    else {
+        clearInterval(interval);
+        node.send([copy, {
+            topic: "success",
+            payload: "Get Items repeat interrupted"
+        }]);
+    }
+}
+
 module.exports = {
     stringify: stringify,
     triageError: triageError,
     padString: padString,
-    merge:function(msg,newObj){
-        return _.merge({},msg,newObj);
-    }
+    getProgress: getProgress,
+    extend: extend,
+    throwNodeError:throwNodeError,
+    getItemSense:getItemSense,
+    terminateLoop:terminateLoop
 };

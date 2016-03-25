@@ -4,26 +4,30 @@
  */
 module.exports = function (RED) {
     "use strict";
-    var lib = require("./itemsense");
+    var lib = require("./itemsense"),
+        _ = require("lodash");
 
     function RunningJobNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this,
-            _ = node.context().global.lodash;
+        var node = this;
 
-        function sendOutput(config,msg){
-            var copy = _.merge({},msg),
+        function sendOutput(config, msg) {
+            var copy = _.extend({}, msg),
                 mode = config.outputMode;
-            if(mode === "array")
+            if (mode === "array")
                 node.send([msg, {
                     topic: "success",
                     payload: "Extracted " + msg.payload.length + " jobs with status " + config.jobStatus,
                     jobStatus: config.jobStatus,
                     count: msg.payload.length
                 }]);
-            else
+            else if (msg.payload.length)
                 _.each(msg.payload, function (object, index) {
-                    copy.payload = object;
+                    copy.payload = {
+                        job: object || {},
+                        count: msg.payload.length,
+                        index: index + 1
+                    };
                     node.send([copy, {
                         topic: "success",
                         payload: "Retracted Job with status " + config.jobStatus,
@@ -31,37 +35,37 @@ module.exports = function (RED) {
                         index: index + 1
                     }]);
                 });
-            if (mode === "single" && msg.payload.length === 0)
-                node.send([null, {
+            else {
+                copy.payload = {
+                    job: null,
+                    count: 0,
+                    index: 0
+                };
+                node.send([copy, {
                     topic: "success",
                     payload: "No Jobs found with status " + config.jobStatus,
                     count: 0,
                     index: 0
                 }]);
+            }
 
         }
 
         this.on("input", function (msg) {
-            var itemSense = node.context().flow.get("itemsense");
+            var itemSense = lib.getItemSense(node, msg);
             node.status({fill: "yellow", shape: "ring", text: "getting running jobs"});
-            itemSense.jobs.getAll().then(function (jobs) {
-                node.status({});
-                msg.topic = "Jobs";
-                msg.payload = config.jobStatus === "ANY" ? jobs : _.filter(jobs, function (job) {
-                    return job.status === config.jobStatus;
+            if (itemSense)
+                itemSense.jobs.getAll().then(function (jobs) {
+                    node.status({});
+                    msg.topic = "Jobs";
+                    msg.payload = config.jobStatus === "ANY" ? jobs : _.filter(jobs, function (job) {
+                        return job.status === config.jobStatus;
+                    });
+                    sendOutput(config, msg);
+                }).catch(function (err) {
+                    var title = "error getting jobs of status " + config.jobStatus;
+                    lib.throwNodeError(err, title, msg, node);
                 });
-                sendOutput(config,msg);
-            }, function (err) {
-                console.log("general error getting jobs of status " + config.jobStatus, err);
-                node.send([null, {
-                    topic: "failure",
-                    error: err,
-                    payload: lib.triageError(err, "Failed to get jobs with status " + config.jobStatus + ". ")
-                }]);
-            }).catch(function (err) {
-                console.log("general error get jobs with status " + config.jobStatus, err, msg, config);
-                node.error(err, {payload: err});
-            });
         });
     }
 

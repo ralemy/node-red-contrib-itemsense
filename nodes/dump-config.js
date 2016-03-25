@@ -105,63 +105,71 @@ module.exports = function (RED) {
             });
         }
 
+        function getJobById(itemsense, msg) {
+            if (!msg.payload || !msg.payload.id)
+                return q.reject({statusCode: 400, message: "No Job Id in msg.payload.id"});
+            return itemsense.jobs.get(msg.payload.id);
+        }
+
         this.on("input", function (msg) {
-            var itemSense = node.context().flow.get("itemsense");
+            var itemSense = lib.getItemSense(node, msg);
             node.status({fill: "red", shape: "ring", text: "Dumping Configuration"});
-            if (!itemSense)
-                node.error("No Itemsense instance defined",
-                    lib.merge(msg, {
-                        topic: "error",
-                        payload: {message: "No Itemsense instance defined", statusCode: 400}
-                    }));
-            else if (config.dumpMode === "running")
-                itemSense.jobs.getAll().then(function (jobs) {
-                    return _.filter(jobs, function (job) {
-                        return job.status === "RUNNING";
+            if (itemSense)
+                if (config.dumpMode === "specific")
+                    getJobById(itemSense, msg).then(function (job) {
+                        return dumpJobData(itemSense, job, msg, 1, 0);
+                    }).then(function (result) {
+                        msg.payload = result;
+                        node.send([msg, {
+                            topic: "success",
+                            payload: "Dumped Object related to Job " + msg.payload.id
+                        }])
+                    }).catch(function (err) {
+                        var jobId = msg.payload ? msg.payload.id : "no job id",
+                            title = "Error dumping job " + jobId;
+                        lib.throwNodeError(err, title, msg, node);
                     });
-                }).then(function (jobs) {
-                    return jobs.length ? jobs :
-                        q.reject({
-                            statusCode: 404,
-                            message: "No Job running on instance " + itemSense.itemsenseUrl
+                else if (config.dumpMode === "running")
+                    itemSense.jobs.getAll().then(function (jobs) {
+                        return _.filter(jobs, function (job) {
+                            return job.status === "RUNNING";
                         });
-                }).then(function (jobs) {
-                    return q.all(_.map(jobs, function (job, index) {
-                        var copy = _.merge({}, msg);
-                        return dumpJobData(itemSense, job, msg, jobs.length, index).then(function (result) {
-                            copy.payload = result;
-                            node.send([copy, {
-                                topic: "success",
-                                payload: "Dumped objects related to running job " + job.id,
-                                count: jobs.length,
-                                index: index
-                            }]);
-                        });
-                    }));
-                }).then(function () {
-                    node.status({});
-                }).catch(function (err) {
-                    console.log("Error dumping running job", err);
-                    node.send([null, {
-                        topic: "failure",
-                        payload: lib.triageError(err, "Error dumping running job")
-                    }]);
-                });
-            else
-                dumpAllConfig(itemSense, msg).then(function (result) {
-                    node.status({});
-                    msg.payload = result;
-                    node.send([msg, {
-                        topic: "success",
-                        payload: "Dumped Configuration for Itemsense Instance " + itemSense.itemsenseUrl
-                    }]);
-                }).catch(function (err) {
-                    console.log("Error dumping config for Itemsense Instance", err);
-                    node.send([null, {
-                        topic: "failure",
-                        payload: lib.triageError(err, "Error dumping config for Itemsense Instance " + itemSense.itemsenseUrl)
-                    }]);
-                });
+                    }).then(function (jobs) {
+                        return q.all(_.map(jobs, function (job, index) {
+                            var copy = _.merge({}, msg);
+                            return dumpJobData(itemSense, job, msg, jobs.length, index).then(function (result) {
+                                copy.payload = result;
+                                node.send([copy, {
+                                    topic: "success",
+                                    payload: "Dumped objects related to running job " + job.id,
+                                    count: jobs.length,
+                                    index: index
+                                }]);
+                            });
+                        }));
+                    }).then(function (jobs) {
+                        node.status({});
+                        return jobs.length ? jobs :
+                            q.reject({
+                                statusCode: 404,
+                                message: "No Job running on instance " + itemSense.itemsenseUrl
+                            });
+                    }).catch(function (err) {
+                        var title = "Error dumping running job";
+                        lib.throwNodeError(err, title, msg, node);
+                    });
+                else
+                    dumpAllConfig(itemSense, msg).then(function (result) {
+                        node.status({});
+                        msg.payload = result;
+                        node.send([msg, {
+                            topic: "success",
+                            payload: "Dumped Configuration for Itemsense Instance " + itemSense.itemsenseUrl
+                        }]);
+                    }).catch(function (err) {
+                        var title = "Error dumping config for Itemsense Instance " + itemSense.itemsenseUrl;
+                        lib.throwNodeError(err, title, msg, node);
+                    });
         });
     }
 

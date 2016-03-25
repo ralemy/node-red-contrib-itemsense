@@ -20,36 +20,32 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemSense = node.context().flow.get("itemsense"),
+            var itemSense = lib.getItemSense(node,msg),
                 action = config.zoneAction,
                 name = getParam(action, msg),
                 title = getTitle(action, name);
             node.status({fill: "red", shape: "ring", text: title});
+            if(!itemSense)
+                return;
             if (action === "Update" && !name)
                 node.error("input message does not have a zoneMapName property",
-                    lib.merge(msg, {
+                    lib.extend(msg, {
                         topic: "error",
-                        payload: {statusCode: 400, message: "input message does not have a zoneMapName property"}
+                        payload: "input message does not have a zoneMapName property",
+                        statusCode: 400
                     }));
             else
                 itemSense.currentZoneMap[action.toLowerCase()](name).then(function (object) {
                     node.status({});
-                    msg.payload = object;
-                    msg.topic = "CurrentZoneMap";
                     node.send([
-                        lib.merge(msg, {payload: object, topic: "CurrentZoneMap"}),
-                        lib.merge(msg, {
+                        lib.extend(msg, {payload: object || {}, topic: "CurrentZoneMap"}),
+                        {
                             topic: "success",
                             payload: title
-                        })]);
+                        }]);
                 }).catch(function (err) {
-                    console.log("Itemsense error " + title, err);
-                    var payload = lib.triageError(err, "Failed to " + title);
-                    node.error(payload,
-                        lib.merge(msg, {
-                            topic: "failure",
-                            payload: payload
-                        }));
+                    var prompt ="Itemsense error " + title;
+                    lib.throwNodeError(err,prompt,msg,node);
                 });
         });
     }

@@ -31,8 +31,6 @@
       "delete-object": "nodes/delete-object.js",
       "current-zone": "nodes/current-zone.js",
       "dump-config": "nodes/dump-config.js",
-      "stash-webcall": "nodes/stash-webcall.js",
-      "web-response": "nodes/web-response.js",
       "itemsense-instance": "nodes/itemsense-instance.js"
     }
   },
@@ -49,5 +47,12 @@
   "gitHead": "88fb23a4183204ef1f57bb399cef729a3b1d58b6",
   "_id": "node-red-contrib-itemsense@1.3.0",
   "_shasum": "57261ac0794f35a4b2bf17a711bb63b43506e8af",
-  "_from": "node-red-contrib-itemsense@>=1.2.0 <2.0.0"
+  "_from": "node-red-contrib-itemsense@>=1.2.0 <2.0.0",
+  "dependencies": {
+    "amqp": "^0.2.4",
+    "itemsense-node": "^1.0.6",
+    "lodash": "^4.6.1",
+    "q": "^1.4.1",
+    "string_decoder": "^0.10.31"
+  }
 }

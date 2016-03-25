@@ -6,21 +6,9 @@
 module.exports = function (RED) {
     "use strict";
     var lib = require("./itemsense"),
+        _ = require("lodash"),
         interval = null;
 
-    function getProgress(config, value) {
-        if (config.repeat == "None")
-            return "complete";
-        if (config.repeat === "Indefinitely")
-            return "Call: " + lib.padString(-1 * value, 2, "0");
-        value -=1;
-        if (!value)
-            return "complete";
-        value *= 100;
-        value /= parseInt(config.count);
-        value = Math.round(100 - value);
-        return lib.padString(value, 2, "0") + "%";
-    }
 
     function getTags(opts) {
         return opts.itemSense.items.get(opts.params).then(function (response) {
@@ -28,19 +16,22 @@ module.exports = function (RED) {
                 tags = opts.epcFilter ? opts._.filter(response.items, function (tag) {
                     return tag.epc.match(epcReg);
                 }) : response.items;
-            return {items: tags, nexPageMarker: response.nextPageMarker}
+            return {
+                items: tags,
+                nexPageMarker: response.nextPageMarker,
+                progress: lib.getProgress(opts.config, opts.count)
+            }
         }).then(function (response) {
-            opts.msg.payload = response;
-            opts.msg.topic = "getItems";
             opts.node.send([
-                opts.msg,
-                {topic: "progress", payload: getProgress(opts.config, opts.count)},
-                {topic: "success", payload: "Retrieved " + opts.msg.payload.items.length + " tags from Itemsense"}
+                lib.extend(opts.msg, {
+                    topic: "getItems",
+                    payload: response
+                }),
+                {topic: "success", payload: "Retrieved " + response.items.length + " tags from Itemsense. " + response.progress}
             ]);
             return response;
         }).catch(function (err) {
-            console.log(err);
-            opts.node.error(err, err);
+            lib.throwNodeError(err,"Error in getItems ",opts.msg,opts.node);
         });
     }
 
@@ -59,7 +50,7 @@ module.exports = function (RED) {
             opts.count -= 1;
             if (config.repeat === "Indefinitely" || opts.count > 0)
                 return getTags(opts).then(function (response) {
-                    if (getProgress(opts.config, opts.count) === "complete")
+                    if (lib.getProgress(opts.config, opts.count) === "complete")
                         stopGetItems();
                     return response;
                 });
@@ -68,37 +59,23 @@ module.exports = function (RED) {
 
     }
 
-    function terminateLoop(node) {
-        if (!interval)
-            node.send([null, {topic: "progress", payload: "complete"}, {
-                topic: "warning",
-                payload: "No interval to terminate"
-            }]);
-        else {
-            clearInterval(interval);
-            interval = null;
-            node.status({});
-            node.send([null, {topic: "progress", payload: "complete"}, {
-                topic: "success",
-                payload: "Get Items repeat interrupted"
-            }]);
-        }
-
+    function terminateLoop(node,msg){
+        lib.terminateLoop(node,msg,interval);
+        interval=null;
     }
 
     function GetItemsNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this,
-            _ = node.context().global.lodash;
+        var node = this;
 
         this.on("input", function (msg) {
             if (msg.topic === "TerminateLoop")
-                return terminateLoop(node);
+                return terminateLoop(node, msg);
             var opts = {
                 epcFilter: config.epcFilter,
-                itemSense: node.context().flow.get("itemsense"),
+                itemSense: lib.getItemSense(node,msg),
                 msg: msg,
-                count : config.repeat==="Indefinitely" ? -1 : (parseInt(config.count) || 1),
+                count: config.repeat === "Indefinitely" ? -1 : (parseInt(config.count) || 1),
                 node: node,
                 config: config,
                 _: _
@@ -107,12 +84,14 @@ module.exports = function (RED) {
             opts.params = (msg.topic === "QueryParams") ? msg.payload : {};
 
             node.status({fill: "green", shape: "ring", text: "getting tag Items"});
-            getTags(opts).then(function (response) {
-                if (config.repeat === "None")
-                    node.status({});
-                else
-                    getByInterval(opts);
-            });
+
+            if (opts.itemSense)
+                getTags(opts).then(function (response) {
+                    if (config.repeat === "None")
+                        node.status({});
+                    else
+                        getByInterval(opts);
+                });
         });
     }
 

@@ -10,10 +10,10 @@
             interval: {value: 1}
         },
         inputs: 1,
-        outputs: 3,
+        outputs: 2,
         icon: "impinj.png",
         label: function () {
-            return this.name || "Get Items from ItemSense";
+            return this.name || "Get Item History";
         },
         oneditprepare:function(){
             function showRepeats(repeat){
@@ -70,20 +70,21 @@
 <script type="text/x-red" data-help-name="item-history">
     <h3>Gets Item History from an Itemsense Instance</h3>
     <p>Expects the Itemsense instance to be in "itemsense" flow variable, as done by the connect node. Uses incoming <code>msg.payload</code>
-    as query parameters if <code>msg.topic</code> equals "QueryParams", otherwise sets the query
+    as query parameters if the <code>msg.topic</code> equals "QueryParams", otherwise sets the query
     params to default. For repeating operations, if the <code>msg.topic</code> equals "TerminateLoop", then it will stop getting
     items.
     </p>
-    <p> At each read, the first output will contain a message that has an object with two members in the <code>payload</code>
+    <p> At each read, the first output will contain a message that has an object with three members in the <code>payload</code>
     property. these include <code>items</code> which is an array of items received, and <code>nextPageMarker</code> which
-    shows whether there are more items that can be queried. the second output is used to define the progress. if
-    <code>Repeat</code> is set to none, the <code>payload</code>
-    of the second message is set to "completed". same happens if the number of repeats is reached or the repeat is terminated by
-    an incoming message. If a repeat is in progress and the target number of repeats is known, the <code>payload</code> will
-    contain the percent progress in the form of "##%". If the repeat is indefinite, the <code>payload</code> will contain the
+    shows whether there are more items that can be queried. If <code>Repeat</code> is set, it also has a <code>progress</code>
+    property which will have the form of "Call: ##" if the repeat is indefinite and the form of "##%" if it is not. if
+    <code>Repeat</code> is set to none, the <code>progress</code> property
+    is set to "completed". same happens if the number of repeats is reached or the repeat is terminated by
+    an incoming message. If a repeat is in progress and the target number of repeats is known, the <code>progress</code> will
+    contain the percent progress in the form of "##%". If the repeat is indefinite, the <code>progress</code> will contain the
     current count of calls in the form of "Call:##".
     </p>
-    <p> The third output is for logging and debugging, contains a
+    <p> The second output is for logging and debugging, contains a
     <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
     of the operation.
     </p>
