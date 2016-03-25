@@ -136,7 +136,7 @@ module.exports = function (RED) {
                         });
                     }).then(function (jobs) {
                         return q.all(_.map(jobs, function (job, index) {
-                            var copy = _.merge({}, msg);
+                            var copy = _.extend({}, msg);
                             return dumpJobData(itemSense, job, msg, jobs.length, index).then(function (result) {
                                 copy.payload = result;
                                 node.send([copy, {
