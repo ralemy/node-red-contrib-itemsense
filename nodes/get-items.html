@@ -69,18 +69,21 @@
 
 <script type="text/x-red" data-help-name="get-items">
     <h3>Gets Items from an Itemsense Instance</h3>
-    <p>Expects the Itemsense instance to be in "itemsense" flow variable, as done by the connect node. Uses incoming <code>msg.payload</code>
-    as query parameters if the <code>msg.topic</code> equals "QueryParams", otherwise sets the query
-    params to default. For repeating operations, if the <code>msg.topic</code> equals "TerminateLoop", then it will stop getting
-    items.
-    </p>
+    <p>Expects the Itemsense instance to be in "itemsense" flow variable, as done by the connect node.</p>
+    <p>Uses incoming <code>msg.payload</code> as query parameters if the <code>msg.topic</code> equals "QueryParams", otherwise sets the query
+    params to default.</p>
+    <p> For repeating operations, if the <code>msg.topic</code> equals "TerminateLoop", then it will stop getting
+    items.</p>
+    <h4>Outputs</h4>
     <p> At each read, the first output will contain a message that has an object with two members in the <code>payload</code>
     property. these include <code>items</code> which is an array of items received, and <code>nextPageMarker</code> which
-    shows whether there are more items that can be queried. If <code>Repeat</code> is set, it also has a <code>progress</code>
-    property which will have the form of "Call: ##" if the repeat is indefinite and the form of "##%" if it is not. if
-    <code>Repeat</code> is set to none, the <code>progress</code> property
-    is set to "completed". same happens if the number of repeats is reached or the repeat is terminated by
-    an incoming message. If a repeat is in progress and the target number of repeats is known, the <code>progress</code> will
+    shows whether there are more items that can be queried.</p>
+    <p>The first output also has a <code>progress</code> property which will have the form of "Call: ##" if the repeat
+    is indefinite and the form of "##%" if it is not. if <code>Repeat</code> is set to none, the <code>progress</code> property
+    is set to "completed". same happens if the number of repeats is reached.</p>
+    <p> if the repeat is terminated by an incoming message with a "TerminateLoop" in <code>msg.topic</code>,
+    the <code>progress witll be set to "interrupted".</p>
+    <p>If a repeat is in progress and the target number of repeats is known, the <code>progress</code> will
     contain the percent progress in the form of "##%". If the repeat is indefinite, the <code>progress</code> will contain the
     current count of calls in the form of "Call:##".
     </p>
