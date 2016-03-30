@@ -40,6 +40,7 @@
     <h3>Subscribes to and consumes from an Itemsense AMQP message queue</h3>
     <p>Gets the Itemsense object from "itemsense" flow context variable, so should be downstream to a component (such
     as the connect node) that creates that variable.</p>
+    <p>If the incoming message has a <code>msg.topic = "CloseConnection"</code> then it will close the previously opened connection</p>
     <p>The node parameters can be passed to it using <code>msg.payload</code>, i.e. in an object that has keys for
     <code>fromZone, toZone, and/or epc</code>. if msg.payload does not contain a parameter, that parameter is read
     from the node configuration. All parameters are optional.</p>
