@@ -106,9 +106,10 @@ module.exports = function (RED) {
         }
 
         function getJobById(itemsense, msg) {
-            if (!msg.payload || !msg.payload.id)
-                return q.reject({statusCode: 400, message: "No Job Id in msg.payload.id"});
-            return itemsense.jobs.get(msg.payload.id);
+            var id = msg.payload ? msg.payload.id || config.jobId : config.jobId;
+            return id ? itemsense.jobs.get(msg.payload.id)
+                : q.reject({statusCode: 400, message: "No Job Id in msg.payload.id or component configuration"});
+
         }
 
         this.on("input", function (msg) {

@@ -11,14 +11,26 @@
         icon: "impinj.png",
         label: function () {
             var titles = {
-                running : "Running Job",
+                running: "Running Job",
                 specific: "Specific Job",
                 instance: 'Instance'
             };
             return this.name || "Dump Configuration for " + titles[this.dumpMode];
         },
         oneditprepare: function () {
+            function showJobIdInput(value) {
+                console.log("value", value);
+                if ("specific" === value)
+                    $("#jobId-input-component").show();
+                else
+                    $("#jobId-input-component").hide();
+            }
+
             $("#dump-modes").val(this.dumpMode);
+            $("#dump-modes").change(function () {
+                showJobIdInput($(this).val());
+            });
+            showJobIdInput(this.dumpMode);
         },
         oneditsave: function () {
             $("#node-input-dumpMode").val($("select#dump-modes option:selected").val());
@@ -40,6 +52,10 @@
         </select>
         <input type="hidden" id="node-input-dumpMode">
     </div>
+    <div class="form-row" id="jobId-input-component">
+        <label for="node-input-jobId"><i class="icon-tag"></i> Job Id</label>
+        <input type="text" id="node-input-jobId" placeholder="jobId">
+    </div>
 
 </script>
 
@@ -50,7 +66,7 @@
     <p> When Mode is set to "Running Job", it dumps the objects for the job, recipe, and the relevant reader configurations, reader definitions, and
     current zone map; and if the current zone map is set, the zone map information is also dumped.</p>
     <p> When Mode is set to "Specific Job", it dumps the same config but for the job whose id is found in
-    <code>msg.payload.id</code>
+    <code>msg.payload.id</code> and if that is not present, the configuration ui.
     </p>
     <p> When Mode is set to "Instance", it dumps the recipes, reader configurations, reader definitions, zone maps,
     facilities, and the current zone map for each facility.</p>
@@ -58,5 +74,6 @@
     <p> The second output is for logging and debugging, contains a
     <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
     of the operation.</p>
+
 
 </script>
