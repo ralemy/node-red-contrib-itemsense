@@ -14,7 +14,7 @@ module.exports = function (RED) {
             timer = null;
 
         function checkJobStatus(opts) {
-            return opts.itemSense.jobs.get(opts.jobId).then(function (job) {
+            return opts.itemsense.jobs.get(opts.jobId).then(function (job) {
                 console.log("Job status", opts.jobId, config.jobStatus, job.status, config.interval);
                 if (job.status === config.jobStatus)
                     opts.defer.resolve(job);
@@ -44,7 +44,7 @@ module.exports = function (RED) {
             setupTimer();
             checkJobStatus({
                 jobId: jobId,
-                itemSense: itemsense,
+                itemsense: itemsense,
                 defer: defer
             });
             return defer.promise;
@@ -59,7 +59,7 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemSense = lib.getItemSense(node, msg),
+            var itemsense = lib.getItemsense(node, msg),
                 jobId = msg.payload && msg.payload.id ? msg.payload.id : null;
             node.status({fill: "yellow", shape: "ring", text: "Waiting for Status: " + config.jobStatus});
             if (!jobId)
@@ -69,8 +69,8 @@ module.exports = function (RED) {
                         payload: "Input message payload does not contain an id property ",
                         statusCode: 500
                     }));
-            if (itemSense)
-                waitForStatus(jobId, itemSense).then(function (job) {
+            if (itemsense)
+                waitForStatus(jobId, itemsense).then(function (job) {
                     node.status({});
                     msg.topic = "Job";
                     msg.payload = job;

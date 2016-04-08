@@ -11,7 +11,7 @@ module.exports = function (RED) {
         var node = this;
 
         this.on("input", function (msg) {
-            var itemsense = lib.getItemSense(node, msg),
+            var itemsense = lib.getItemsense(node, msg),
                 object = typeof msg.payload === "object" ? msg.payload : null;
             node.status({fill: "red", shape: "ring", text: "Create or update " + config.objectType});
             if (itemsense)

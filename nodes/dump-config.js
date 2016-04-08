@@ -113,12 +113,12 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemSense = lib.getItemSense(node, msg);
+            var itemsense = lib.getItemsense(node, msg);
             node.status({fill: "red", shape: "ring", text: "Dumping Configuration"});
-            if (itemSense)
+            if (itemsense)
                 if (config.dumpMode === "specific")
-                    getJobById(itemSense, msg).then(function (job) {
-                        return dumpJobData(itemSense, job, msg, 1, 0);
+                    getJobById(itemsense, msg).then(function (job) {
+                        return dumpJobData(itemsense, job, msg, 1, 0);
                     }).then(function (result) {
                         msg.payload = result;
                         node.send([msg, {
@@ -131,14 +131,14 @@ module.exports = function (RED) {
                         lib.throwNodeError(err, title, msg, node);
                     });
                 else if (config.dumpMode === "running")
-                    itemSense.jobs.getAll().then(function (jobs) {
+                    itemsense.jobs.getAll().then(function (jobs) {
                         return _.filter(jobs, function (job) {
                             return job.status === "RUNNING";
                         });
                     }).then(function (jobs) {
                         return q.all(_.map(jobs, function (job, index) {
                             var copy = _.extend({}, msg);
-                            return dumpJobData(itemSense, job, msg, jobs.length, index).then(function (result) {
+                            return dumpJobData(itemsense, job, msg, jobs.length, index).then(function (result) {
                                 copy.payload = result;
                                 node.send([copy, {
                                     topic: "success",
@@ -153,22 +153,22 @@ module.exports = function (RED) {
                         return jobs.length ? jobs :
                             q.reject({
                                 statusCode: 404,
-                                message: "No Job running on instance " + itemSense.itemsenseUrl
+                                message: "No Job running on instance " + itemsense.itemsenseUrl
                             });
                     }).catch(function (err) {
                         var title = "Error dumping running job";
                         lib.throwNodeError(err, title, msg, node);
                     });
                 else
-                    dumpAllConfig(itemSense, msg).then(function (result) {
+                    dumpAllConfig(itemsense, msg).then(function (result) {
                         node.status({});
                         msg.payload = result;
                         node.send([msg, {
                             topic: "success",
-                            payload: "Dumped Configuration for Itemsense Instance " + itemSense.itemsenseUrl
+                            payload: "Dumped Configuration for Itemsense Instance " + itemsense.itemsenseUrl
                         }]);
                     }).catch(function (err) {
-                        var title = "Error dumping config for Itemsense Instance " + itemSense.itemsenseUrl;
+                        var title = "Error dumping config for Itemsense Instance " + itemsense.itemsenseUrl;
                         lib.throwNodeError(err, title, msg, node);
                     });
         });

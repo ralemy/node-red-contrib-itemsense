@@ -1,6 +1,6 @@
 /**
  * Created by ralemy on 2/21/16.
- * Node-Red node to stop an ItemSense Job
+ * Node-Red node to stop an Itemsense Job
  */
 module.exports = function (RED) {
     "use strict";
@@ -11,7 +11,7 @@ module.exports = function (RED) {
         var node = this;
 
         this.on("input", function (msg) {
-            var itemSense = lib.getItemSense(node,msg),
+            var itemsense = lib.getItemsense(node,msg),
                 jobId = msg.payload && msg.payload.id ? msg.payload.id : null;
             node.status({fill: "red", shape: "ring", text: "stopping Job:" + jobId});
             if (!jobId)
@@ -21,8 +21,8 @@ module.exports = function (RED) {
                         payload: "Input message payload does not contain an id property ",
                         statusCode: 500
                     }));
-            else if(itemSense)
-                itemSense.jobs.stop(jobId).then(function () {
+            else if(itemsense)
+                itemsense.jobs.stop(jobId).then(function () {
                     node.status({});
                     node.send([msg, {topic: "success", payload: "Attempting to Stop Job: " + jobId}]);
                 }).catch(function (err) {

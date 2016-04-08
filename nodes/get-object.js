@@ -49,13 +49,13 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemSense = lib.getItemSense(node, msg),
+            var itemsense = lib.getItemsense(node, msg),
                 name = msg.payload ? msg.payload.name : null,
                 action = name ? "get" : "getAll",
                 title = (name ? name + " from" : "all") + " " + config.objectType;
             node.status({fill: "red", shape: "ring", text: "Retracting " + title});
-            if (itemSense)
-                itemSense[config.objectType][action](name).then(function (object) {
+            if (itemsense)
+                itemsense[config.objectType][action](name).then(function (object) {
                     node.status({});
                     msg.payload = name ? [object] : object;
                     msg.topic = config.objectType;

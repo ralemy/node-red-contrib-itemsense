@@ -52,10 +52,10 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemSense = lib.getItemSense(node, msg);
+            var itemsense = lib.getItemsense(node, msg);
             node.status({fill: "yellow", shape: "ring", text: "getting running jobs"});
-            if (itemSense)
-                itemSense.jobs.getAll().then(function (jobs) {
+            if (itemsense)
+                itemsense.jobs.getAll().then(function (jobs) {
                     node.status({});
                     msg.topic = "Jobs";
                     msg.payload = config.jobStatus === "ANY" ? jobs : _.filter(jobs, function (job) {

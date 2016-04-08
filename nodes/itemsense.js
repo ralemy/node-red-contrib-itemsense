@@ -4,6 +4,7 @@
  */
 
 var _ = require("lodash"),
+    Itemsense = require("itemsense-node"),
     q = require("q");
 
 function stringify(target) {
@@ -57,11 +58,11 @@ function getProgress(config, value) {
     return padString(value, 2, "0") + "%";
 }
 
-function extend(msg,newObj){
-    return _.extend({},msg,newObj);
+function extend(msg, newObj) {
+    return _.extend({}, msg, newObj);
 }
 
-function throwNodeError(err,title, msg,node){
+function throwNodeError(err, title, msg, node) {
     console.log(title, err);
     var payload = triageError(err, title);
     node.error(payload,
@@ -72,26 +73,60 @@ function throwNodeError(err,title, msg,node){
         }));
 }
 
-function getItemSense(node,msg){
-    var itemSense = node.context().flow.get("itemsense");
-    if(!itemSense)
+function connectToItemsense(msg) {
+    var Factory = Itemsense,
+        instance = new Factory({
+            itemsenseUrl: msg.itemsenseUrl,
+            username: msg.username,
+            password: msg.password
+        });
+    instance.username = msg.username;
+    instance.password = msg.password;
+    return instance;
+}
+
+function hasItemsenseInfo(msg) {
+    return msg && msg.payload && msg.payload.itemsenseUrl;
+}
+
+function registerItemsense(node, msg, LocalItemsense) {
+    var itemsense = node.context().flow.get("itemsense");
+    if (!itemsense)
+        if (hasItemsenseInfo(msg))
+            itemsense = connectToItemsense(msg.payload);
+        else if (LocalItemsense)
+            itemsense = LocalItemsense.itemsense;
+    if (itemsense)
+        node.context().flow.set("itemsense", itemsense);
+    else
+        node.error("Must either configure an itemsense-instance or pass info in the message object",
+            lib.extend(msg, {
+                topic: "error",
+                payload: "Must either configure an itemsense-instance or pass info in the message object",
+                statusCode: 400
+            }));
+    return itemsense;
+}
+function getItemsense(node, msg) {
+    var itemsense = node.context().flow.get("itemsense");
+    if (!itemsense)
         node.error("Itemsense Instance flow variable absent. use a connect node",
             extend(msg, {
                 topic: "failure",
                 payload: "Itemsense flow variable absent",
                 statusCode: 500
             }));
-    return itemSense;
+    return itemsense;
 }
 
 function terminateLoop(node, msg, interval) {
-    var copy = extend(msg,{
-        payload:{
-            items:[],
-            nextPageMarker:null,
-            progress:"interrupted"
+    var copy = extend(msg, {
+        payload: {
+            items: [],
+            nextPageMarker: null,
+            progress: "interrupted"
         }
-    })
+    });
     node.status({});
     if (!interval)
         node.send([copy, {
@@ -113,7 +148,10 @@ module.exports = {
     padString: padString,
     getProgress: getProgress,
     extend: extend,
-    throwNodeError:throwNodeError,
-    getItemSense:getItemSense,
-    terminateLoop:terminateLoop
+    throwNodeError: throwNodeError,
+    getItemsense: getItemsense,
+    terminateLoop: terminateLoop,
+    hasItemsenseInfo: hasItemsenseInfo,
+    connectToItemsense:connectToItemsense,
+    registerItemsense:registerItemsense
 };

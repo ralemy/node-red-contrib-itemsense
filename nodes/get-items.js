@@ -11,7 +11,7 @@ module.exports = function (RED) {
 
 
     function getTags(opts) {
-        return opts.itemSense.items.get(opts.params).then(function (response) {
+        return opts.itemsense.items.get(opts.params).then(function (response) {
             var epcReg = opts.epcFilter ? new RegExp(opts.epcFilter) : null,
                 tags = opts.epcFilter ? opts._.filter(response.items, function (tag) {
                     return tag.epc.match(epcReg);
@@ -73,7 +73,7 @@ module.exports = function (RED) {
                 return terminateLoop(node, msg);
             var opts = {
                 epcFilter: config.epcFilter,
-                itemSense: lib.getItemSense(node,msg),
+                itemsense: lib.getItemsense(node,msg),
                 msg: msg,
                 count: config.repeat === "Indefinitely" ? -1 : (parseInt(config.count) || 1),
                 node: node,
@@ -85,7 +85,7 @@ module.exports = function (RED) {
 
             node.status({fill: "green", shape: "ring", text: "getting tag Items"});
 
-            if (opts.itemSense)
+            if (opts.itemsense)
                 getTags(opts).then(function (response) {
                     if (config.repeat === "None")
                         node.status({});

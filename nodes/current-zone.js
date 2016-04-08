@@ -20,12 +20,12 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemSense = lib.getItemSense(node,msg),
+            var itemsense = lib.getItemsense(node,msg),
                 action = config.zoneAction,
                 name = getParam(action, msg),
                 title = getTitle(action, name);
             node.status({fill: "red", shape: "ring", text: title});
-            if(!itemSense)
+            if(!itemsense)
                 return;
             if (action === "Update" && !name)
                 node.error("input message does not have a zoneMapName property",
@@ -35,7 +35,7 @@ module.exports = function (RED) {
                         statusCode: 400
                     }));
             else
-                itemSense.currentZoneMap[action.toLowerCase()](name).then(function (object) {
+                itemsense.currentZoneMap[action.toLowerCase()](name).then(function (object) {
                     node.status({});
                     node.send([
                         lib.extend(msg, {payload: object || {}, topic: "CurrentZoneMap"}),

@@ -97,18 +97,18 @@ module.exports = function (RED) {
 
         this.on("input", function (msg) {
             node.status({fill: "yellow", shape: "ring", text: "Registering Queue"});
-            var itemSense = lib.getItemSense(node, msg),
+            var itemsense = lib.getItemsense(node, msg),
                 channelQP = getQueueParameters(msg.payload || {});
             if (msg.topic === "CloseConnection")
                 closeConnection();
-            else if (itemSense)
-                itemSense.messageQueue.configure(channelQP).then(function (channel) {
+            else if (itemsense)
+                itemsense.messageQueue.configure(channelQP).then(function (channel) {
                     node.status({fill: "green", shape: "ring", text: "waiting for messages"});
                     node.send([null, null, {topic: "success", payload: "AMQP Queue Opened.", queue: channel}]);
                     return consumeQueue(amqp.createConnection({
                         url: channel.serverUrl,
-                        login: itemSense.username,
-                        password: itemSense.password
+                        login: itemsense.username,
+                        password: itemsense.password
                     }, {reconnect: false}), channel.queue);
                 }).then(function () {
                     node.status({});

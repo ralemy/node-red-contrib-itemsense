@@ -11,10 +11,10 @@ module.exports = function (RED) {
         var node = this;
 
         this.on("input", function (msg) {
-            var itemSense = lib.getItemSense(node, msg),
+            var itemsense = lib.getItemsense(node, msg),
                 name = msg.payload ? msg.payload.name : null;
             node.status({fill: "red", shape: "ring", text: "delete " + name + " from " + config.objectType});
-            if (itemSense)
+            if (itemsense)
                 if (!name)
                     node.error("No name provided in payload.name",
                         lib.extend(msg, {
@@ -22,8 +22,8 @@ module.exports = function (RED) {
                             statusCode: 400,
                             topic: "error"
                         }));
-                else if (itemSense[config.objectType].delete)
-                    itemSense[config.objectType].delete(name).then(function (object) {
+                else if (itemsense[config.objectType].delete)
+                    itemsense[config.objectType].delete(name).then(function (object) {
                         node.status({});
                         node.send([
                             lib.extend(msg, {payload: object || {}, topic: config.objectType}),

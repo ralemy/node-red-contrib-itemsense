@@ -21,7 +21,7 @@
 
             function populateRecipes(){
                 window.relayCall({
-                    itemSense: RED.nodes.node(current),
+                    itemsense: RED.nodes.node(current),
                     url: "/configuration/v1/recipes/show",
                     success:window.populateSelect({
                         container: "recipe-name",
@@ -34,7 +34,7 @@
 
             function populateFacilities(){
                 window.relayCall({
-                    itemSense: RED.nodes.node(current),
+                    itemsense: RED.nodes.node(current),
                     url: "/configuration/v1/facilities/show",
                     success:window.populateSelect({
                         container: "facility-name",
@@ -68,7 +68,6 @@
                         queryItemsense(newIS);
             });
             queryItemsense(current);
-            console.log(current);
         }
     });
 </script>

@@ -37,7 +37,7 @@
         }
     };
     window.relayCall = function(opts) {
-        var itemSense = opts.itemSense,
+        var itemsense = opts.itemsense,
                 url = opts.url,
                 method = opts.method || "GET",
                 body = opts.body,
@@ -50,9 +50,9 @@
             method: "POST",
             dataType: "json",
             data: {
-                url: itemSense.url.replace(/\/$/, "") + url,
-                user: itemSense.user,
-                password: itemSense.password,
+                url: itemsense.url.replace(/\/$/, "") + url,
+                user: itemsense.user,
+                password: itemsense.password,
                 json: true,
                 method: method,
                 body: body
@@ -66,7 +66,7 @@
 <script type="text/x-red" data-template-name="itemsense-instance">
     <div class="form-row">
         <label for="node-input-url"><i class="fa fa-globe"></i> Url</label>
-        <input type="text" id="node-config-input-url" placeholder="ItemSense base URL">
+        <input type="text" id="node-config-input-url" placeholder="Itemsense base URL">
     </div>
     <div class="form-row node-input-useAuth-row">
         <label for="node-input-user"><i class="fa fa-user"></i> <span data-i18n="common.label.username"></span></label>

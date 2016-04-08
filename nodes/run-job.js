@@ -1,6 +1,6 @@
 /**
  * Created by ralemy on 2/21/16.
- * Node-Red node to run an ItemSense Job
+ * Node-Red node to run an Itemsense Job
  */
 module.exports = function (RED) {
     "use strict";
@@ -40,17 +40,18 @@ module.exports = function (RED) {
                 "reportToMessageQueueEnabled": true,
                 "reportToFileEnabled": false,
                 "facility": config.facility
-            };
+            },
+            LocalItemsense = RED.nodes.getNode(config.itemsense);
 
         this.on("input", function (msg) {
-            var itemSense = lib.getItemSense(node,msg);
+            var itemsense = lib.registerItemsense(node, msg, LocalItemsense);
             Object.keys(jobObject).forEach(function (key) {
                 if (msg.payload && msg.payload[key])
                     jobObject[key] = msg.payload[key];
             });
-            node.status({fill: "red", shape: "ring", text: "calling ItemSense"});
-            if(itemSense)
-                itemSense.jobs.start(jobObject).then(function (job) {
+            node.status({fill: "red", shape: "ring", text: "calling Itemsense"});
+            if (itemsense)
+                itemsense.jobs.start(jobObject).then(function (job) {
                     node.status({});
                     msg.topic = "Job";
                     msg.payload = job;
@@ -59,14 +60,14 @@ module.exports = function (RED) {
                     var triage = triageError(err);
                     if (triage.jobId)
                         node.send([null,
-                            lib.extend(msg,{topic: "jobId", payload: {id: triage.jobId}}),
+                            lib.extend(msg, {topic: "jobId", payload: {id: triage.jobId}}),
                             {
                                 topic: "failure",
                                 payload: {statusCode: 400, message: "Another Job is Running " + triage.jobId}
                             }
                         ]);
                     else if (triage.body)
-                        node.error(triage.message, lib.extend(msg,{
+                        node.error(triage.message, lib.extend(msg, {
                             topic: "failure",
                             payload: triage.body,
                             statusCode: triage.body.statusCode
