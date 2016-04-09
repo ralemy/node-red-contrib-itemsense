@@ -11,5 +11,12 @@ to ItemSense and perform each action.
 
 # How to use samples:
 
-In your Admin UI, add a new Flow, and select Import from Clipboard from the menu, and paste the json file. 
-More information about each sample can be found in the **How to Run** comment node.
+In your Admin UI, add a new Flow, and select Import from Clipboard from the menu.
+
+Paste the contents of <code>all-samples.json</code> file.
+
+This will add a number of tabs that contain examples of how each node could be used.
+
+Finally, go to the Connect and Run Job nodes on the flow and select the correct 
+Itemsense instance for your tests.
+
