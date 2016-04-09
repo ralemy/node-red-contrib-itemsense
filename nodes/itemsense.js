@@ -5,7 +5,8 @@
 
 var _ = require("lodash"),
     Itemsense = require("itemsense-node"),
-    q = require("q");
+    request = require("request");
+q = require("q");
 
 function stringify(target) {
     try {
@@ -142,6 +143,21 @@ function terminateLoop(node, msg, interval) {
     }
 }
 
+var hookedIntoApp = false;
+
+function registerApp(app){
+    app.use("/itemsense", function (req, res) {
+        req.body.uri = req.body.url;
+        delete req.body.url;
+        request(req.body, function (err, response, body) {
+            if (err)
+                res.status(500).send(err);
+            else
+                res.status(response.statusCode).send(body);
+        }).auth(req.body.user, req.body.password);
+    });
+}
+
 module.exports = {
     stringify: stringify,
     triageError: triageError,
@@ -152,6 +168,11 @@ module.exports = {
     getItemsense: getItemsense,
     terminateLoop: terminateLoop,
     hasItemsenseInfo: hasItemsenseInfo,
-    connectToItemsense:connectToItemsense,
-    registerItemsense:registerItemsense
+    connectToItemsense: connectToItemsense,
+    registerItemsense: registerItemsense,
+    hookIntoApp: function (RED) {
+        if (!hookedIntoApp)
+            registerApp(RED.httpNode || RED.httpAdmin);
+        hookedIntoApp = true;
+    }
 };

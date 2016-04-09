@@ -53,6 +53,7 @@
     "itemsense-node": "^1.0.6",
     "lodash": "^4.6.1",
     "q": "^1.4.1",
+    "request": "^2.70.0",
     "string_decoder": "^0.10.31"
   }
 }

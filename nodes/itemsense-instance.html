@@ -1,16 +1,16 @@
 <script type="text/javascript">
-    RED.nodes.registerType('itemsense-instance',{
+    RED.nodes.registerType('itemsense-instance', {
         category: 'config',
         defaults: {
-            url:{value:"",required:true},
-            user:{value:"",required:true},
-            password:{value:"",required:true}
+            url: {value: "", required: true},
+            user: {value: "", required: true},
+            password: {value: "", required: true}
         },
-        label: function() {
-            return this.url||"Itemsense Instance";
+        label: function () {
+            return this.url || "Itemsense Instance";
         }
     });
-    window.populateSelect=function(opts) {
+    window.populateSelect = function (opts) {
         var container = $("#" + opts.container),
                 parameter = $("#" + opts.parameter),
                 selector = opts.selector,
@@ -36,8 +36,9 @@
             alternative.hide();
         }
     };
-    window.relayCall = function(opts) {
-        var itemsense = opts.itemsense,
+    window.relayCall = function (opts) {
+        var base = RED.settings.httpNodeRoot || RED.settings.httpAdminRoot,
+                itemsense = opts.itemsense,
                 url = opts.url,
                 method = opts.method || "GET",
                 body = opts.body,
@@ -46,7 +47,7 @@
                             window.alert("error" + JSON.stringify(arguments, null, " "));
                         };
         $.ajax({
-            url: "/relay",
+            url: base + "/itemsense",
             method: "POST",
             dataType: "json",
             data: {
@@ -76,6 +77,8 @@
         <label for="node-input-password"><i class="fa fa-lock"></i> <span data-i18n="common.label.password"></span></label>
         <input type="password" id="node-config-input-password">
     </div>
+
+
 </script>
 
 <script type="text/x-red" data-help-name="itemsense-instance">
@@ -83,4 +86,6 @@
     <p>Itemsense nodes will fall back on this node if their incoming message doesnot have an <code>itemsense</code>
     property, or they need information such as username and password and can't find it in their input message
     </p>
+
+
 </script>

@@ -7,6 +7,8 @@ module.exports = function (RED) {
 
     var lib = require("./itemsense");
 
+    lib.hookIntoApp(RED);
+
     function triageError(err) {
         if (err.response)
             if (err.response.body)
