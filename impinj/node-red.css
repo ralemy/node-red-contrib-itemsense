@@ -1,0 +1,26 @@
+div#header{
+    background-color: #E8E6E6;
+}
+span.logo img{
+    top:-5px;
+    height:40px;
+    position:relative;
+}
+span.logo span{
+    color:#692c2c;
+}
+a.deploy-button{
+    border-radius:10px;
+    padding-right: 18px;
+}
+a#btn-deploy.disabled{
+    background-color: lightgrey;
+}
+
+#btn-deploy-icon{
+    display:none;
+}
+
+#header .button{
+    border:none;
+}
