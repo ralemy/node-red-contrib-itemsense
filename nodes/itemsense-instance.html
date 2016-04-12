@@ -37,7 +37,7 @@
         }
     };
     window.relayCall = function (opts) {
-        var base = RED.settings.httpNodeRoot || RED.settings.httpAdminRoot || "",
+        var base = (RED.settings.httpNodeRoot || RED.settings.httpAdminRoot || "").replace(/\/$/,""),
                 itemsense = opts.itemsense,
                 url = opts.url,
                 method = opts.method || "GET",
