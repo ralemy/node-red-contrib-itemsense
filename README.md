@@ -9,7 +9,16 @@ Node-RED contribution package that adds nodes which enable the use of Impinj Ite
 - install the package: `npm install -g node-red-contrib-itemsense`
 - optionally, install the robot package `npm install -g node-red-contrib-icreate-upnp`
 - optionally, crete a settings file, and use the settings.js file in this repository to change the look and feel of your installation (you need to copy the impinj directory to where your settings file is)
+    - For Mac and Linux:
+        - `cp -fr /usr/local/lib/node_modules/node-red-contrib-itemsense/impinj ~/.node-red`
+        - `cp -fr /usr/local/lib/node_modules/node-red-contrib-itemsense/settings.js ~/.node-red`
+    - For Windows:
+        - `mkdir <root>:\Users\<yourname>\.node-red\impinj`
+        - `copy <root>:\Users\<yourname>\AppData\Roaming\npm\node-modules\node-red-contrib-itemsense\impinj <root>:\Users\<yourname>\.node-red\impinj`
+        - `copy <root>:\Users\<yourname>\AppData\Roaming\npm\node-modules\node-red-contrib-itemsense\settings.js <root>:\Users\<yourname>\.node-red`
+- Afterwards, all you have to do is run it with `node-red` command
 
+    
 ## Setting up for development
 - clone this repository and go to its directory `cd node-red-contrib-itemsense`
 - install Node-RED (locally so you can edit sources) `npm install node-red`
