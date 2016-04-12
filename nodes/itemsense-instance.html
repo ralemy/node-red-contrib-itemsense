@@ -46,7 +46,6 @@
                 error = opts.error || function () {
                             window.alert("error" + JSON.stringify(arguments, null, " "));
                         };
-        console.log("base",base);
         $.ajax({
             url: base + "/itemsense",
             method: "POST",
