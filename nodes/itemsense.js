@@ -91,7 +91,7 @@ function hasItemsenseInfo(msg) {
 }
 
 function registerItemsense(node, msg, LocalItemsense) {
-    var itemsense = node.context().flow.get("itemsense");
+    var itemsense = msg.itemsense || node.context().flow.get("itemsense");
     if (!itemsense)
         if (hasItemsenseInfo(msg))
             itemsense = connectToItemsense(msg.payload);
@@ -109,7 +109,7 @@ function registerItemsense(node, msg, LocalItemsense) {
     return itemsense;
 }
 function getItemsense(node, msg) {
-    var itemsense = node.context().flow.get("itemsense");
+    var itemsense = msg.itemsense || node.context().flow.get("itemsense");
     if (!itemsense)
         node.error("Itemsense Instance flow variable absent. use a connect node",
             extend(msg, {
