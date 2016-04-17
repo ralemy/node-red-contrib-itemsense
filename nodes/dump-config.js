@@ -107,7 +107,7 @@ module.exports = function (RED) {
 
         function getJobById(itemsense, msg) {
             var id = msg.payload ? msg.payload.id || config.jobId : config.jobId;
-            return id ? itemsense.jobs.get(msg.payload.id)
+            return id ? itemsense.jobs.get(id)
                 : q.reject({statusCode: 400, message: "No Job Id in msg.payload.id or component configuration"});
 
         }
