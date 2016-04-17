@@ -12,7 +12,7 @@ module.exports = function (RED) {
         setOpts(opts) {
             this.opts = opts;
             this.emitResponse = this.sendResponse.bind(this);
-            this.emitError = lib.raiseNodeRedError.bind("Error in GetItems", opts.msg, opts.node);
+            this.emitError = lib.raiseNodeRedError.bind(lib,"Error in GetItems", opts.msg, opts.node);
             if(this.interval)
                 clearInterval(this.interval);
             this.interval = null;
@@ -38,7 +38,7 @@ module.exports = function (RED) {
         }
 
         filterTags(items) {
-            const epcReg = opts.epcFilter ? new RegExp(opts.epcFilter) : null;
+            const epcReg = this.opts.epcFilter ? new RegExp(this.opts.epcFilter) : null;
             return this.opts.epcFilter ? _.filter(items, tag=> t.epc.match(epcReg)) : items;
         }
 
@@ -62,18 +62,18 @@ module.exports = function (RED) {
             this.opts.node.status({});
         }
 
-        getByInterval(opts) {
+        getByInterval() {
 
             this.interval = setInterval(() => {
                 this.opts.count -= 1;
-                if (this.config.repeat === "Indefinitely" || this.opts.count > 0)
+                if (this.opts.config.repeat === "Indefinitely" || this.opts.count > 0)
                     return this.getTags().then((response) => {
                         if (lib.getProgress(this.opts.config, this.opts.count) === "complete")
                             this.stopGetItems();
                         return response;
                     });
                 this.stopGetItems();
-            }, parseInt(this.config.interval) * 1000);
+            }, parseInt(this.opts.config.interval) * 1000);
 
         }
 
