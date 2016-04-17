@@ -50,7 +50,7 @@
   "_from": "node-red-contrib-itemsense@>=1.2.0 <2.0.0",
   "dependencies": {
     "amqp": "^0.2.4",
-    "itemsense-node": "^1.0.6",
+    "itemsense-node": "^1.0.7",
     "lodash": "^4.6.1",
     "q": "^1.4.1",
     "request": "^2.70.0",
