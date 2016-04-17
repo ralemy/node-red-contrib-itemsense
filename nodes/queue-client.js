@@ -95,7 +95,7 @@ module.exports = function (RED) {
             connection = newConnection;
         }
 
-        function waitForMessages(channel) {
+        function amqpListener(itemsense, channel) {
             node.status({fill: "green", shape: "ring", text: "waiting for messages"});
             node.send([null, null, {topic: "success", payload: "AMQP Queue Opened.", queue: channel}]);
             return consumeQueue(amqp.createConnection({
@@ -126,6 +126,7 @@ module.exports = function (RED) {
             node.status({fill: "yellow", shape: "ring", text: "Registering Queue"});
             var itemsense = lib.getItemsense(node, msg),
                 channelQP = getQueueParameters(msg.payload || {}),
+                waitForMessages = amqpListener.bind(node,itemsense),
                 announceMsg = notify.bind(node, msg),
                 reportError = lib.throwNodeError.bind(lib,"Error in AMQP", msg,node);
             if (msg.topic === "CloseConnection") {
