@@ -165,6 +165,9 @@ module.exports = {
     getProgress: getProgress,
     extend: extend,
     throwNodeError: throwNodeError,
+    raiseNodeRedError:function(title,msg,node,err){
+        throwNodeError(err,title,msg,node);
+    },
     getItemsense: getItemsense,
     terminateLoop: terminateLoop,
     hasItemsenseInfo: hasItemsenseInfo,

@@ -5,7 +5,7 @@
 module.exports = function (RED) {
     "use strict";
 
-    var lib = require("./itemsense");
+    var lib = require("./lib/itemsense");
 
     lib.hookIntoApp(RED);
 

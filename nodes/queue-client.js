@@ -4,7 +4,7 @@
  */
 module.exports = function (RED) {
     "use strict";
-    var lib = require("./itemsense"),
+    var lib = require("./lib/itemsense"),
         q = require("q"),
         amqp = require("amqp"),
         _ = require("lodash"),
@@ -95,41 +95,50 @@ module.exports = function (RED) {
             connection = newConnection;
         }
 
+        function waitForMessages(channel) {
+            node.status({fill: "green", shape: "ring", text: "waiting for messages"});
+            node.send([null, null, {topic: "success", payload: "AMQP Queue Opened.", queue: channel}]);
+            return consumeQueue(amqp.createConnection({
+                url: channel.serverUrl,
+                login: itemsense.username,
+                password: itemsense.password
+            }, {reconnect: false}), channel.queue);
+        }
+
+        function notify(msg, message) {
+            switch (message.type) {
+                case "log":
+                    return node.send([null, null, message.body]);
+                case "ready":
+                    return node.send([lib.extend(msg, message.body), null, message.body]);
+                default:
+                    node.send([null, lib.extend(msg, message.body), {
+                        topic: "message",
+                        payload: "AMQP Message Received",
+                        AMQPmessage: message.body
+                    }]);
+            }
+        }
+        function clearStatus(){
+            node.status({});
+        }
         this.on("input", function (msg) {
             node.status({fill: "yellow", shape: "ring", text: "Registering Queue"});
             var itemsense = lib.getItemsense(node, msg),
-                channelQP = getQueueParameters(msg.payload || {});
-            if (msg.topic === "CloseConnection")
+                channelQP = getQueueParameters(msg.payload || {}),
+                announceMsg = notify.bind(node, msg),
+                reportError = lib.throwNodeError.bind(lib,"Error in AMQP", msg,node);
+            if (msg.topic === "CloseConnection") {
                 closeConnection();
+                msg.payload = "connection closed";
+                node.send([msg, null, {topic: "success", payload: "connection closed"}]);
+            }
             else if (itemsense)
-                itemsense.messageQueue.configure(channelQP).then(function (channel) {
-                    node.status({fill: "green", shape: "ring", text: "waiting for messages"});
-                    node.send([null, null, {topic: "success", payload: "AMQP Queue Opened.", queue: channel}]);
-                    return consumeQueue(amqp.createConnection({
-                        url: channel.serverUrl,
-                        login: itemsense.username,
-                        password: itemsense.password
-                    }, {reconnect: false}), channel.queue);
-                }).then(function () {
-                    node.status({});
-                    if (!nodeClosing) {
-                        msg.payload = "connection closed";
-                        node.send([msg, null, {topic: "success", payload: "connection closed"}]);
-                    }
-                }, null, function (message) {
-                    if (message.type === "log")
-                        node.send([null, null, message.body]);
-                    else if (message.type === "ready")
-                        node.send([lib.extend(msg, message.body), null, message.body]);
-                    else
-                        node.send([null, lib.extend(msg, message.body), {
-                            topic: "message",
-                            payload: "AMQP Message Received",
-                            AMQPmessage: message.body
-                        }]);
-                }).catch(function (err) {
-                    lib.throwNodeError(err, "Error in  AMQP", msg, node);
-                });
+                itemsense.messageQueue.configure(channelQP)
+                    .then(waitForMessages)
+                    .progress(announceMsg)
+                    .then(clearStatus)
+                    .catch(reportError);
         });
         node.on("close", function () {
             nodeClosing = true;

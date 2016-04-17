@@ -4,7 +4,7 @@
  */
 module.exports = function (RED) {
     "use strict";
-    var lib = require("./itemsense"),
+    var lib = require("./lib/itemsense"),
         _ = require("lodash");
 
     function RunningJobNode(config) {
