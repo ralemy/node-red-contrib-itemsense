@@ -5,64 +5,85 @@
 
 module.exports = function (RED) {
     "use strict";
-    var lib = require("./lib/itemsense"),
-        _ = require("lodash"),
-        interval = null;
+    const lib = require("./lib/itemsense"),
+        _ = require("lodash");
 
+    class TagRetriever {
+        setOpts(opts) {
+            this.opts = opts;
+            this.emitResponse = this.sendResponse.bind(this);
+            this.emitError = lib.raiseNodeRedError.bind("Error in GetItems", opts.msg, opts.node);
+            if(this.interval)
+                clearInterval(this.interval);
+            this.interval = null;
+            return this;
+        }
 
-    function getTags(opts) {
-        return opts.itemsense.items.get(opts.params).then(function (response) {
-            var epcReg = opts.epcFilter ? new RegExp(opts.epcFilter) : null,
-                tags = opts.epcFilter ? opts._.filter(response.items, function (tag) {
-                    return tag.epc.match(epcReg);
-                }) : response.items;
+        getTags() {
+            return this.opts.itemsense.items.get(this.opts.params)
+                .then((response) => {
+                    const tags = this.filterTags(response.items);
+                    return this.createResponse(tags, response.nextPageMarker);
+                })
+                .then(this.emitResponse)
+                .catch(this.emitError);
+        }
+
+        createResponse(tags, nextPageMarker) {
             return {
                 items: tags,
-                nexPageMarker: response.nextPageMarker,
-                progress: lib.getProgress(opts.config, opts.count)
-            }
-        }).then(function (response) {
-            opts.node.send([
-                lib.extend(opts.msg, {
+                nexPageMarker: nextPageMarker,
+                progress: lib.getProgress(this.opts.config, this.opts.count)
+            };
+        }
+
+        filterTags(items) {
+            const epcReg = opts.epcFilter ? new RegExp(opts.epcFilter) : null;
+            return this.opts.epcFilter ? _.filter(items, tag=> t.epc.match(epcReg)) : items;
+        }
+
+        sendResponse(response) {
+            this.opts.node.send([
+                lib.extend(this.opts.msg, {
                     topic: "getItems",
                     payload: response
                 }),
-                {topic: "success", payload: "Retrieved " + response.items.length + " tags from Itemsense. " + response.progress}
+                {
+                    topic: "success",
+                    payload: "Retrieved " + response.items.length + " tags from Itemsense. " + response.progress
+                }
             ]);
             return response;
-        }).catch(function (err) {
-            lib.throwNodeError(err,"Error in getItems ",opts.msg,opts.node);
-        });
-    }
-
-
-    function getByInterval(opts) {
-        var node = opts.node,
-            config = opts.config;
-
-        function stopGetItems() {
-            clearInterval(interval);
-            interval = null;
-            node.status({});
         }
 
-        interval = setInterval(function () {
-            opts.count -= 1;
-            if (config.repeat === "Indefinitely" || opts.count > 0)
-                return getTags(opts).then(function (response) {
-                    if (lib.getProgress(opts.config, opts.count) === "complete")
-                        stopGetItems();
-                    return response;
-                });
-            stopGetItems();
-        }, parseInt(config.interval) * 1000);
+        stopGetItems() {
+            if(this.interval)   clearInterval(this.interval);
+            this.interval = null;
+            this.opts.node.status({});
+        }
 
+        getByInterval(opts) {
+
+            this.interval = setInterval(() => {
+                this.opts.count -= 1;
+                if (this.config.repeat === "Indefinitely" || this.opts.count > 0)
+                    return this.getTags().then((response) => {
+                        if (lib.getProgress(this.opts.config, this.opts.count) === "complete")
+                            this.stopGetItems();
+                        return response;
+                    });
+                this.stopGetItems();
+            }, parseInt(this.config.interval) * 1000);
+
+        }
+
+        terminateLoop(node, msg) {
+            lib.terminateLoop(node, msg, this.interval);
+            this.interval = null;
+        }
     }
 
-    function terminateLoop(node,msg){
-        lib.terminateLoop(node,msg,interval);
-        interval=null;
-    }
+    const tagRetriever = new TagRetriever();
 
     function GetItemsNode(config) {
         RED.nodes.createNode(this, config);
@@ -70,10 +91,10 @@ module.exports = function (RED) {
 
         this.on("input", function (msg) {
             if (msg.topic === "TerminateLoop")
-                return terminateLoop(node, msg);
+                return tagRetriever.terminateLoop(node, msg);
             var opts = {
                 epcFilter: config.epcFilter,
-                itemsense: lib.getItemsense(node,msg),
+                itemsense: lib.getItemsense(node, msg),
                 msg: msg,
                 count: config.repeat === "Indefinitely" ? -1 : (parseInt(config.count) || 1),
                 node: node,
@@ -86,11 +107,11 @@ module.exports = function (RED) {
             node.status({fill: "green", shape: "ring", text: "getting tag Items"});
 
             if (opts.itemsense)
-                getTags(opts).then(function (response) {
-                    if (config.repeat === "None")
+                tagRetriever.setOpts(opts).getTags().then(()=>{
+                    if(config.repeat === "None")
                         node.status({});
                     else
-                        getByInterval(opts);
+                        tagRetriever.getByInterval();
                 });
         });
     }
