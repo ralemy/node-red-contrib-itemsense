@@ -136,8 +136,7 @@ module.exports = function (RED) {
             else if (itemsense)
                 itemsense.messageQueue.configure(channelQP)
                     .then(waitForMessages)
-                    .progress(announceMsg)
-                    .then(clearStatus)
+                    .then(clearStatus,reportError,announceMsg)
                     .catch(reportError);
         });
         node.on("close", function () {
