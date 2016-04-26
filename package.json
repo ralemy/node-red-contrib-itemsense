@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-itemsense",
-  "version": "2.4.9",
+  "version": "2.5.0",
   "description": "Node-RED contribution that adds node for the use of Impinj ItemSense IoT platform",
   "repository": {
     "type": "git",
