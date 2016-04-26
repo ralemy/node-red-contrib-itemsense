@@ -5,7 +5,8 @@
         defaults: {
             name: {value: ""},
             dumpMode: {value: "running", required: true},
-            jobId: {value:""}
+            outputMode: {value:"array"},
+            jobId: {value: ""}
         },
         inputs: 1,
         outputs: 2,
@@ -20,14 +21,18 @@
         },
         oneditprepare: function () {
             function showJobIdInput(value) {
-                console.log("value", value);
                 if ("specific" === value)
                     $("#jobId-input-component").show();
                 else
                     $("#jobId-input-component").hide();
+                if ("running" === value)
+                    $("#job-output-mode").show();
+                else
+                    $("#job-output-mode").hide();
             }
 
             $("#dump-modes").val(this.dumpMode);
+            $("#output-modes").val(this.outputMode);
             $("#dump-modes").change(function () {
                 showJobIdInput($(this).val());
             });
@@ -35,6 +40,7 @@
         },
         oneditsave: function () {
             $("#node-input-dumpMode").val($("select#dump-modes option:selected").val());
+            $("#node-input-outputMode").val($("select#output-modes option:selected").val());
         }
     });
 </script>
@@ -53,10 +59,19 @@
         </select>
         <input type="hidden" id="node-input-dumpMode">
     </div>
+    <div class="form-row">
+        <label for="output-modes"><i class="fa fa-repeat"></i> Output </label>
+        <select id="output-modes">
+            <option value="array" selected>Array</option>
+            <option value="single" selected>Single Object</option>
+        </select>
+        <input type="hidden" id="node-input-outputMode">
+    </div>
     <div class="form-row" id="jobId-input-component">
         <label for="node-input-jobId"><i class="icon-tag"></i> Job Id</label>
         <input type="text" id="node-input-jobId" placeholder="jobId">
     </div>
+
 
 </script>
 
@@ -75,6 +90,7 @@
     <p> The second output is for logging and debugging, contains a
     <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
     of the operation.</p>
+
 
 
 </script>

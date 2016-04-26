@@ -12,7 +12,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         var node = this;
 
-        function dumpAllConfig(itemsense, msg) {
+        function dumpAllConfig(itemsense) {
             var result = {
                 signature: "Dump configuration for Itemsense Instance: " + itemsense.itemsenseUrl,
                 timestamp: new Date().toUTCString(),
@@ -47,12 +47,10 @@ module.exports = function (RED) {
             });
         }
 
-        function dumpJobData(itemsense, job, msg, count, index) {
+        function dumpJobData(itemsense, job) {
             var result = {
                     signature: "Dump configuration for job: " + job.id + " running on " + itemsense.itemsenseUrl,
                     timestamp: new Date().toUTCString(),
-                    totalJobsRunning: count,
-                    index: index,
                     job: job,
                     currentZoneMap: [],
                     recipe: null,
@@ -105,72 +103,72 @@ module.exports = function (RED) {
             });
         }
 
-        function getJobById(itemsense, msg) {
-            var id = msg.payload ? msg.payload.id || config.jobId : config.jobId;
+        function getJobById(itemsense, id) {
             return id ? itemsense.jobs.get(id)
                 : q.reject({statusCode: 400, message: "No Job Id in msg.payload.id or component configuration"});
 
         }
 
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg);
+            var itemsense = lib.getItemsense(node, msg),
+                jobId = msg.payload ? msg.payload.id || config.jobId : config.jobId;
             node.status({fill: "red", shape: "ring", text: "Dumping Configuration"});
             if (itemsense)
                 if (config.dumpMode === "specific")
-                    getJobById(itemsense, msg).then(function (job) {
-                        return dumpJobData(itemsense, job, msg, 1, 0);
+                    getJobById(itemsense, jobId).then(function (job) {
+                        return dumpJobData(itemsense, job);
                     }).then(function (result) {
                         msg.payload = result;
                         node.send([msg, {
                             topic: "success",
-                            payload: "Dumped Object related to Job " + msg.payload.id
+                            payload: `Dumped Object related to Job ${jobId}`
                         }])
-                    }).catch(function (err) {
-                        var jobId = msg.payload ? msg.payload.id : "no job id",
-                            title = "Error dumping job " + jobId;
-                        lib.throwNodeError(err, title, msg, node);
-                    });
+                    }).catch(lib.raiseNodeRedError.bind(lib, `Error dumping job ${jobId}`, msg, node));
                 else if (config.dumpMode === "running")
-                    itemsense.jobs.getAll().then(function (jobs) {
-                        return _.filter(jobs, function (job) {
-                            return job.status.startsWith("RUNNING");
-                        });
-                    }).then(function (jobs) {
+                    itemsense.jobs.getAll().then((jobs) => {
+                        return _.filter(jobs, (job) => job.status.startsWith("RUNNING"));
+                    }).then((jobs) => {
                         return q.all(_.map(jobs, function (job, index) {
-                            var copy = _.extend({}, msg);
-                            return dumpJobData(itemsense, job, msg, jobs.length, index).then(function (result) {
-                                copy.payload = result;
-                                node.send([copy, {
-                                    topic: "success",
-                                    payload: "Dumped objects related to running job " + job.id,
-                                    count: jobs.length,
-                                    index: index
-                                }]);
+                            return dumpJobData(itemsense, job).then(function (result) {
+                                result.totalJobsRunning = jobs.length;
+                                result.index = index;
+                                return result;
                             });
                         }));
-                    }).then(function (jobs) {
+                    }).then((jobs) => {
                         node.status({});
-                        return jobs.length ? jobs :
-                            q.reject({
+                        if (!jobs.length)
+                            return q.reject({
                                 statusCode: 404,
                                 message: "No Job running on instance " + itemsense.itemsenseUrl
                             });
-                    }).catch(function (err) {
-                        var title = "Error dumping running job";
-                        lib.throwNodeError(err, title, msg, node);
-                    });
+                        msg.payload = jobs;
+                        if (config.outputMode === "array")
+                            node.send([msg, {
+                                topic: "success",
+                                payload: `Dumped objects related to ${jobs.length} running jobs`
+                            }]);
+                        else
+                            _.each(jobs,(job)=>{
+                                const copy = _.extend({},msg);
+                                copy.payload = job;
+                                node.send([copy,{
+                                    topic: "success",
+                                    payload: `Dumped objects related to running job ${job.job.id}`,
+                                    count: job.totalJobsRunning,
+                                    index: job.index
+                                }]);
+                            });
+                    }).catch(lib.raiseNodeRedError.bind(lib,"Error dumping running job", msg,node));
                 else
-                    dumpAllConfig(itemsense, msg).then(function (result) {
+                    dumpAllConfig(itemsense).then((result) => {
                         node.status({});
                         msg.payload = result;
                         node.send([msg, {
                             topic: "success",
-                            payload: "Dumped Configuration for Itemsense Instance " + itemsense.itemsenseUrl
+                            payload: `Dumped Configuration for Itemsense Instance ${itemsense.itemsenseUrl}`
                         }]);
-                    }).catch(function (err) {
-                        var title = "Error dumping config for Itemsense Instance " + itemsense.itemsenseUrl;
-                        lib.throwNodeError(err, title, msg, node);
-                    });
+                    }).catch(lib.raiseNodeRedError.bind(lib, `Error dumping config for ${itemsense.itemsenseUrl}`, msg,node));
         });
     }
 
