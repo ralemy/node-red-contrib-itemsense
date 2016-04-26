@@ -133,7 +133,7 @@ module.exports = function (RED) {
                 else if (config.dumpMode === "running")
                     itemsense.jobs.getAll().then(function (jobs) {
                         return _.filter(jobs, function (job) {
-                            return job.status === "RUNNING";
+                            return job.status.startsWith("RUNNING");
                         });
                     }).then(function (jobs) {
                         return q.all(_.map(jobs, function (job, index) {
