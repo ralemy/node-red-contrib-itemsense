@@ -31,6 +31,7 @@
       "delete-object": "nodes/delete-object.js",
       "current-zone": "nodes/current-zone.js",
       "dump-config": "nodes/dump-config.js",
+      "json-output": "nodes/json-output.js",
       "itemsense-instance": "nodes/itemsense-instance.js"
     }
   },

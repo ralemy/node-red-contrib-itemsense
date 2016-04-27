@@ -1,0 +1,146 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css"/>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
+<script type="text/javascript">
+    function JSONLogEntry() {
+        const self = this;
+        this.content = $("<div>").css({"position": "relative", "height": "100%"});
+        this.toolbar = $('<div class="sidebar-header"><a id="json-tab-clear" title="clear log" class="button" href="#"><i class="fa fa-trash"></i></a></div>').appendTo(this.content);
+        this.messages = $('<div id="json-content"/>').appendTo(this.content);
+        this.toolbar.find("#json-tab-clear").click(function () {
+            self.messages.find(".json-message").remove();
+            RED.nodes.eachNode(function (node) {
+                node.highlighted = false;
+                node.dirty = true;
+            });
+            RED.view.redraw();
+        });
+    }
+    JSONLogEntry.prototype = {
+        removeIfTooLong: function () {
+            const logs = this.messages.find(".json-message");
+            if (logs.length > 200)
+                logs.eq(0).remove();
+        },
+        scrollToLast: function () {
+            if (this.messages.height() > this.content.height())
+                this.content.parent().scrollTop(this.messages.height());
+        },
+        highlightNode: function (n, highlight) {
+            this.css("border-right-color", highlight ? "#999" : "");
+            if (n) {
+                n.highlighted = highlight;
+                n.dirty = true;
+            }
+            RED.view.redraw();
+        },
+        makeLogEntry: function (n) {
+            const log = $("<div>").addClass("json-message").appendTo(this.messages);
+            $("<span>").addClass("debug-message-date").html(new Date().toLocaleString()).appendTo(log);
+            $("<button>").addClass("fa fa-copy pull-right").css({
+                paddingTop:"3px", paddingBottom:"4px"
+            }).html("Copy").appendTo(log);
+            $("<div>").addClass("json-object").appendTo(log);
+            log.on("mouseover", this.highlightNode.bind(log, n, true));
+            log.on("mouseout", this.highlightNode.bind(log, n, false));
+            log.on("click", function () {
+                if (n) RED.workspaces.show(n.z);
+            });
+            return log.find("div.json-object");
+        },
+        activateCopy: function (btn, msg) {
+            var self = this;
+            btn.click(function () {
+                const $temp = $("<textarea>").appendTo("body");
+                $temp.val(msg).select();
+                self.copyToClip(msg);
+                $temp.remove();
+            });
+        },
+        copyToClip:function(msg){
+            if(document.queryCommandSupported)
+                if(document.queryCommandSupported("copy"))
+                    return document.execCommand("copy");
+            window.prompt("Press Ctrl-C or Command-C to copy to clipboard",msg);
+        },
+        handleMessage: function (name, obj) {
+            this.removeIfTooLong();
+            const log = this.makeLogEntry(RED.nodes.node(obj.id));
+            log.JSONView(obj.msg, {collapsed: true});
+            this.activateCopy(log.parent().find("button"), JSON.stringify(obj.msg,null," "));
+            this.scrollToLast();
+        }
+    };
+    RED.nodes.registerType('json-output', {
+        category: 'Itemsense',
+        color: '#87a980',
+        defaults: {
+            name: {value: ""}
+        },
+        inputs: 1,
+        outputs: 0,
+        align:"right",
+        icon: "impinj.png",
+        label: function () {
+            return this.name || "JSON Msg";
+        },
+        onpaletteadd: function () {
+            const logger = new JSONLogEntry();
+            this.handler = logger.handleMessage.bind(logger);
+            RED.sidebar.addTab({
+                id: "JSON",
+                label: "Json",
+                name: "jsonOutput",
+                content: logger.content
+            });
+            RED.comms.subscribe("jsonOutput", this.handler);
+        },
+        onpaletteremove: function () {
+            RED.comms.unsubscribe("jsonOutput", this.handler);
+            RED.sidebar.removeTab("JSON");
+        }
+    });
+</script>
+
+
+<script type="text/x-red" data-template-name="json-output">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+
+
+
+
+</script>
+
+<script type="text/x-red" data-help-name="json-output">
+    <h3>Display Json output</h3>
+    <p>Adds a JSON tab to the sidebar and shows the <code>msg</code> or one of it's properties as Json object, which can
+    be folded to abstarct the contents of the message. </p>
+    <p>Each log has a copy button. for browsers that support it (Chrome, Firefox), it will copy the Json object to the
+    clipboard. For browsers that do not support it (Safari) a dialog box is displayed. press Command-C to copy the Json
+    object to clipboard. press Enter to close the dialog box.</p>
+    <p><b>Note:</b> This can get too big very fast. it will automatically remove the older messages if the load becomes
+    too big. plan accordingly</p>
+
+</script>
+
+<style>
+    #json-content {
+        position: absolute;
+        top: 43px;
+        bottom: 0px;
+        left:0px;
+        right: 0px;
+        overflow-y: scroll;
+    }
+    .json-message {
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        border-left: 8px solid #eee;
+        border-right: 8px solid #eee;
+        padding: 2px;
+    }
+</style>
