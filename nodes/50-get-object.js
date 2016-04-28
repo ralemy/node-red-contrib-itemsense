@@ -49,21 +49,17 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg),
-                name = msg.payload ? msg.payload.name : null,
+            var name = msg.payload ? msg.payload.name : null,
                 action = name ? "get" : "getAll",
-                title = (name ? name + " from" : "all") + " " + config.objectType;
-            node.status({fill: "red", shape: "ring", text: "Retracting " + title});
+                title = (name ? name + " from" : "all") + " " + config.objectType,
+                itemsense = lib.getItemsense(node, msg, "Retracting " + title);
             if (itemsense)
                 itemsense[config.objectType][action](name).then(function (object) {
-                    node.status({});
+                    lib.status("exit", "", node);
                     msg.payload = name ? [object] : object;
                     msg.topic = config.objectType;
                     sendOutput(config.outputMode, msg, title, name);
-                }).catch(function (err) {
-                    var title = "Itemsense error get " + title;
-                    lib.throwNodeError(err,title,msg,node);
-                });
+                }).catch(lib.raiseNodeRedError.bind(lib, "Itemsense Error get " + title, msg, node));
         });
     }
 

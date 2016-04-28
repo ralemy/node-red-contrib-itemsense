@@ -20,8 +20,8 @@ module.exports = function (RED) {
                     opts.defer.resolve(job);
                 else if (job.errors.length)
                     opts.defer.reject({
-                        statusCode:500,
-                        message: "Job " + opts.jobId + " has errors: " + JSON.stringify(job.errors),
+                        statusCode: 500,
+                        message: `Job ${opts.jobId} has errors: ${JSON.stringify(job.errors)}`,
                         job: job
                     });
                 else if (continueChecking)
@@ -30,8 +30,8 @@ module.exports = function (RED) {
                     }, parseInt(config.interval || 1) * 1000);
                 else
                     opts.defer.reject({
-                        statusCode:504,
-                        message: "Timed out waiting for Job" + opts.jobId + "to get to " + config.jobStatus,
+                        statusCode: 504,
+                        message: `Timed out waiting for Job ${opts.jobId} to get to ${config.jobStatus}`,
                         job: job
                     });
             }, function (err) {
@@ -59,29 +59,22 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg),
+            const title = "Waiting for Status: " + config.jobStatus,
+                itemsense = lib.getItemsense(node, msg, title),
+                error = "Input message payload does not contain an id property ",
                 jobId = msg.payload && msg.payload.id ? msg.payload.id : null;
-            node.status({fill: "yellow", shape: "ring", text: "Waiting for Status: " + config.jobStatus});
             if (!jobId)
-                node.error("Input message payload does not contain an id property ",
-                    lib.extend(msg, {
-                        topic: "error",
-                        payload: "Input message payload does not contain an id property ",
-                        statusCode: 500
-                    }));
-            if (itemsense)
+                lib.raiseNodeRedError(error, msg, node, {message: error});
+            else if (itemsense)
                 waitForStatus(jobId, itemsense).then(function (job) {
-                    node.status({});
+                    lib.status("exit", "", node);
                     msg.topic = "Job";
                     msg.payload = job;
                     node.send([msg, {
                         topic: "Success",
                         payload: "Job " + msg.payload.id + " is now " + config.jobStatus
                     }]);
-                }).catch(function (err) {
-                    var title = "Failed waiting for " + config.jobStatus + " status. ";
-                    lib.throwNodeError(err, title, msg, node);
-                });
+                }).catch(lib.raiseNodeRedError.bind(lib, "Failed " + title, msg, node));
         });
     }
 

@@ -10,18 +10,27 @@ module.exports = function (RED) {
         interval = null;
 
 
-    function getTags(opts) {
+    function getCollection(opts,collection){
+        collection = collection || [];
         return opts.itemsense.items.getHistory(opts.params).then(function (response) {
             var epcReg = opts.epcFilter ? new RegExp(opts.epcFilter) : null,
                 tags = opts.epcFilter ? opts._.filter(response.history, function (tag) {
                     return tag.epc.match(epcReg);
                 }) : response.history;
+            collection = collection.concat(tags);
+            opts.params.pageMarker = response.nextPageMarker;
+            console.log("collection", collection.length, opts.config.maxTags, response.nextPageMarker);
+            if(response.nextPageMarker && collection.length < parseInt(opts.config.maxTags || 1000))
+                return getCollection(opts,collection);
             return {
-                items: tags,
+                items: collection,
                 nexPageMarker: response.nextPageMarker,
                 progress: lib.getProgress(opts.config, opts.count)
             }
-        }).then(function (response) {
+        });
+    }
+    function getTags(opts) {
+        return getCollection(opts).then(function (response) {
             opts.node.send([
                 lib.extend(opts.msg, {
                     topic: "getHistory",
@@ -29,10 +38,7 @@ module.exports = function (RED) {
                 }),
                 {topic: "success", payload: "Retrieved " + response.items.length + " tags from Itemsense. " + response.progress}
             ]);
-            return response;
-        }).catch(function (err) {
-            lib.throwNodeError(err,"Error in get history ",opts.msg,opts.node);
-        });
+        }).catch(lib.raiseNodeRedError.bind(lib,"Error Get Item History",opts.msg,opts.node));
     }
 
 
@@ -49,10 +55,11 @@ module.exports = function (RED) {
         interval = setInterval(function () {
             opts.count -= 1;
             if (config.repeat === "Indefinitely" || opts.count > 0)
-                return getTags(opts).then(function (response) {
-                    if (lib.getProgress(opts.config, opts.count) === "complete")
+                return getTags(opts).then(function (err) {
+                    if(err)
+                        clearInterval(interval);
+                    else if (lib.getProgress(opts.config, opts.count) === "complete")
                         stopGetItems();
-                    return response;
                 });
             stopGetItems();
         }, parseInt(config.interval) * 1000);
@@ -73,7 +80,7 @@ module.exports = function (RED) {
                 return terminateLoop(node, msg);
             var opts = {
                 epcFilter: config.epcFilter,
-                itemsense: lib.getItemsense(node,msg),
+                itemsense: lib.getItemsense(node,msg,"Getting Item History"),
                 msg: msg,
                 count: config.repeat === "Indefinitely" ? -1 : (parseInt(config.count) || 1),
                 node: node,
@@ -82,11 +89,13 @@ module.exports = function (RED) {
             };
 
             opts.params = (msg.topic === "QueryParams") ? msg.payload : {};
+            opts.params = msg.payload && msg.payload.queryParams ? msg.payload.queryParams : opts.params;
 
-            node.status({fill: "green", shape: "ring", text: "getting tag Items"});
 
             if (opts.itemsense)
-                getTags(opts).then(function (response) {
+                getTags(opts).then(function (err) {
+                    if(err)
+                        return;
                     if (config.repeat === "None")
                         node.status({});
                     else

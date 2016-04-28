@@ -110,14 +110,14 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg),
+            var itemsense = lib.getItemsense(node, msg,"Dumping Configuration"),
                 jobId = msg.payload ? msg.payload.id || config.jobId : config.jobId;
-            node.status({fill: "red", shape: "ring", text: "Dumping Configuration"});
             if (itemsense)
                 if (config.dumpMode === "specific")
                     getJobById(itemsense, jobId).then(function (job) {
                         return dumpJobData(itemsense, job);
                     }).then(function (result) {
+                        lib.status("exit","",node);
                         msg.payload = result;
                         node.send([msg, {
                             topic: "success",
@@ -136,13 +136,13 @@ module.exports = function (RED) {
                             });
                         }));
                     }).then((jobs) => {
-                        node.status({});
                         if (!jobs.length)
                             return q.reject({
                                 statusCode: 404,
                                 message: "No Job running on instance " + itemsense.itemsenseUrl
                             });
                         msg.payload = jobs;
+                        lib.status("exit","",node);
                         if (config.outputMode === "array")
                             node.send([msg, {
                                 topic: "success",
@@ -162,7 +162,7 @@ module.exports = function (RED) {
                     }).catch(lib.raiseNodeRedError.bind(lib,"Error dumping running job", msg,node));
                 else
                     dumpAllConfig(itemsense).then((result) => {
-                        node.status({});
+                        lib.status("exit","",node);
                         msg.payload = result;
                         node.send([msg, {
                             topic: "success",

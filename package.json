@@ -18,21 +18,21 @@
   ],
   "node-red": {
     "nodes": {
-      "connect": "nodes/connect.js",
-      "filter-jobs": "nodes/filter-jobs.js",
-      "run-job": "nodes/run-job.js",
-      "stop-job": "nodes/stop-job.js",
-      "wait-status": "nodes/wait-status.js",
-      "get-items": "nodes/get-items.js",
-      "item-history": "nodes/item-history.js",
-      "queue-client": "nodes/queue-client.js",
-      "get-object": "nodes/get-object.js",
-      "create-object": "nodes/create-object.js",
-      "delete-object": "nodes/delete-object.js",
-      "current-zone": "nodes/current-zone.js",
-      "dump-config": "nodes/dump-config.js",
-      "json-output": "nodes/json-output.js",
-      "itemsense-instance": "nodes/itemsense-instance.js"
+      "connect": "nodes/10-connect.js",
+      "filter-jobs": "nodes/15-filter-jobs.js",
+      "run-job": "nodes/20-run-job.js",
+      "stop-job": "nodes/25-stop-job.js",
+      "wait-status": "nodes/30-wait-status.js",
+      "get-items": "nodes/35-get-items.js",
+      "item-history": "nodes/40-item-history.js",
+      "queue-client": "nodes/45-queue-client.js",
+      "get-object": "nodes/50-get-object.js",
+      "create-object": "nodes/55-create-object.js",
+      "delete-object": "nodes/60-delete-object.js",
+      "current-zone": "nodes/65-current-zone.js",
+      "dump-config": "nodes/70-dump-config.js",
+      "json-output": "nodes/75-json-output.js",
+      "itemsense-instance": "nodes/80-itemsense-instance.js"
     }
   },
   "author": {

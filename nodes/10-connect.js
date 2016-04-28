@@ -30,17 +30,20 @@ module.exports = function (RED) {
 
         this.on("input", function (msg) {
             var itemsense = null;
+            lib.status("enter","Connecting to ItemSense",node);
             if (lib.hasItemsenseInfo(msg))
                 itemsense = lib.connectToItemsense(msg.payload);
             else if (LocalItemsense)
                 itemsense = LocalItemsense.itemsense;
             else {
-                node.error("Must either configure an itemsense-instance or pass info in the message object",
+                const error = "Must either configure an itemsense-instance or pass info in the message object";
+                node.error(error,
                     lib.extend(msg, {
                         topic: "error",
                         payload: "Must either configure an itemsense-instance or pass info in the message object",
                         statusCode: 400
                     }));
+                lib.status("error",error,node);
                 return;
             }
             node.context().flow.set("itemsense", itemsense);
@@ -51,6 +54,7 @@ module.exports = function (RED) {
                         topic: "success",
                         payload: "Connected to " + itemsense.itemsenseUrl
                     }]);
+            lib.status("exit","",node);
         });
     }
     RED.nodes.registerType("connect", ConnectNode);

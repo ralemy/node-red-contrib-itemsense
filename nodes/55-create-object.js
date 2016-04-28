@@ -11,9 +11,8 @@ module.exports = function (RED) {
         var node = this;
 
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg),
+            var itemsense = lib.getItemsense(node, msg,"Create or update " + config.objectType),
                 object = typeof msg.payload === "object" ? msg.payload : null;
-            node.status({fill: "red", shape: "ring", text: "Create or update " + config.objectType});
             if (itemsense)
                 itemsense[config.objectType].update(object).then(function (object) {
                     node.status({});
@@ -24,11 +23,7 @@ module.exports = function (RED) {
                             payload: "updated " + config.objectType + (object ? ": " + object.name || "" : ""),
                             data: object
                         }]);
-                }).catch(function (err) {
-                    var title = "Itemsense error updating " + config.objectType;
-                    lib.throwNodeError(err, title, msg, node);
-                    console.log("Itemsense error updating " + config.objectType, object);
-                });
+                }).catch(lib.raiseNodeRedError.bind(lib,"Error Updating " + config.objectType,msg,node));
         });
     }
 

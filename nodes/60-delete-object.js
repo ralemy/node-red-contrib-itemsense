@@ -11,20 +11,15 @@ module.exports = function (RED) {
         var node = this;
 
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg),
+            var itemsense = lib.getItemsense(node, msg, "delete " + name + " from " + config.objectType),
+                error ="No Name Provided in payload.name",
                 name = msg.payload ? msg.payload.name : null;
-            node.status({fill: "red", shape: "ring", text: "delete " + name + " from " + config.objectType});
             if (itemsense)
                 if (!name)
-                    node.error("No name provided in payload.name",
-                        lib.extend(msg, {
-                            payload: "No name provided in payload.name",
-                            statusCode: 400,
-                            topic: "error"
-                        }));
+                    lib.raiseNodeRedError(error,msg,node,{message:error});
                 else if (itemsense[config.objectType].delete)
                     itemsense[config.objectType].delete(name).then(function (object) {
-                        node.status({});
+                        lib.status("exit","",node);
                         node.send([
                             lib.extend(msg, {payload: object || {}, topic: config.objectType}),
                             {
@@ -32,17 +27,12 @@ module.exports = function (RED) {
                                 payload: "deleted " + name + " from " + config.objectType,
                                 data: object
                             }]);
-                    }).catch(function (err) {
-                        var title = "Itemsense error deleting " + name + " from " + config.objectType;
-                        lib.throwNodeError(err, title, msg, node);
-                    });
+                    }).catch(lib.raiseNodeRedError.bind(lib,`Error deleting ${name} form ${config.objectType}`,msg,node));
                 else
-                    node.error(config.objectType + " does not support delete action",
-                        lib.extend(msg, {
-                            topic: "error",
-                            payload: config.objectType + " does not support delete action",
-                            statuCode: 400
-                        }));
+                    lib.raiseNodeRedError(config.objectType + " does not support delete action",msg,node,{
+                        statusCode:400,
+                        message: config.objectType + " does not support delete action"
+                    });
         });
     }
 

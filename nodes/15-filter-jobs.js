@@ -52,20 +52,17 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg);
-            node.status({fill: "yellow", shape: "ring", text: "getting running jobs"});
+            var title = `Getting Jobs with status ${config.jobStatus}`,
+                itemsense = lib.getItemsense(node, msg, title);
             if (itemsense)
                 itemsense.jobs.getAll().then(function (jobs) {
-                    node.status({});
                     msg.topic = "Jobs";
                     msg.payload = config.jobStatus === "ANY" ? jobs : _.filter(jobs, function (job) {
                         return job.status === config.jobStatus;
                     });
                     sendOutput(config, msg);
-                }).catch(function (err) {
-                    var title = "error getting jobs of status " + config.jobStatus;
-                    lib.throwNodeError(err, title, msg, node);
-                });
+                    lib.status("exit","", node);
+                }).catch(lib.raiseNodeRedError.bind(lib, "Error " + title, msg, node));
         });
     }
 

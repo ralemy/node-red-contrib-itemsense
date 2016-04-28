@@ -96,7 +96,7 @@ module.exports = function (RED) {
         }
 
         function amqpListener(itemsense, channel) {
-            node.status({fill: "green", shape: "ring", text: "waiting for messages"});
+            node.status({fill: "yellow", shape: "ring", text: "waiting for messages"});
             node.send([null, null, {topic: "success", payload: "AMQP Queue Opened.", queue: channel}]);
             return consumeQueue(amqp.createConnection({
                 url: channel.serverUrl,
@@ -112,6 +112,7 @@ module.exports = function (RED) {
                 case "ready":
                     return node.send([lib.extend(msg, message.body), null, message.body]);
                 default:
+                    node.status({fill: "green", shape: "ring", text: "receiving messages"});
                     node.send([null, lib.extend(msg, message.body), {
                         topic: "message",
                         payload: "AMQP Message Received",
@@ -123,15 +124,15 @@ module.exports = function (RED) {
             node.status({});
         }
         this.on("input", function (msg) {
-            node.status({fill: "yellow", shape: "ring", text: "Registering Queue"});
-            var itemsense = lib.getItemsense(node, msg),
+            var itemsense = lib.getItemsense(node, msg,"Registering Queue"),
                 channelQP = getQueueParameters(msg.payload || {}),
                 waitForMessages = amqpListener.bind(node,itemsense),
                 announceMsg = notify.bind(node, msg),
-                reportError = lib.throwNodeError.bind(lib,"Error in AMQP", msg,node);
+                reportError = lib.raiseNodeRedError.bind(lib,"Error in AMQP", msg,node);
             if (msg.topic === "CloseConnection") {
                 closeConnection();
                 msg.payload = "connection closed";
+                lib.status("exit","",node);
                 node.send([msg, null, {topic: "success", payload: "connection closed"}]);
             }
             else if (itemsense)

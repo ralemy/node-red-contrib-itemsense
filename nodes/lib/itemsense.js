@@ -108,7 +108,17 @@ function registerItemsense(node, msg, LocalItemsense) {
             }));
     return itemsense;
 }
-function getItemsense(node, msg) {
+function status(status,title,node){
+    switch(status){
+        case "enter":
+            return node.status({fill: "yellow", shape: "ring", text: title});
+        case "exit":
+            return node.status({});
+        case "error":
+            return node.status({fill: "red", shape: "ring", text: title});
+    }
+}
+function getItemsense(node, msg,title) {
     var itemsense = msg.itemsense || node.context().flow.get("itemsense");
     if (!itemsense)
         node.error("Itemsense Instance flow variable absent. use a connect node",
@@ -117,6 +127,8 @@ function getItemsense(node, msg) {
                 payload: "Itemsense flow variable absent",
                 statusCode: 500
             }));
+    else
+        status("enter",title,node);
     return itemsense;
 }
 
@@ -167,6 +179,8 @@ module.exports = {
     throwNodeError: throwNodeError,
     raiseNodeRedError:function(title,msg,node,err){
         throwNodeError(err,title,msg,node);
+        this.status("error",title,node);
+        return err;
     },
     getItemsense: getItemsense,
     terminateLoop: terminateLoop,
@@ -177,5 +191,6 @@ module.exports = {
         if (!hookedIntoApp)
             registerApp(RED.httpNode || RED.httpAdmin);
         hookedIntoApp = true;
-    }
+    },
+    status:status
 };

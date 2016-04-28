@@ -26,40 +26,42 @@ module.exports = function (RED) {
                     body: {statusCode: err.response.statusCode},
                     message: "Job Start Failed: " + err.response.statusCode
                 };
-        return {jobId: null, body: {statusCode: 500, message: err.message}};
+        return {jobId: null, body: {statusCode: 500, message: err.message}, message: err.message};
     }
 
     function RunJobNode(config) {
         RED.nodes.createNode(this, config);
         var node = this,
-            jobObject = {
-                "recipeName": config.recipe,
-                "durationSeconds": config.runLength,
-                "playbackLoggingEnabled": false,
-                "presenceLoggingEnabled": true,
-                "startDelay": config.startDelay,
-                "reportToDatabaseEnabled": true,
-                "reportToMessageQueueEnabled": true,
-                "reportToFileEnabled": false,
-                "facility": config.facility
-            },
             LocalItemsense = RED.nodes.getNode(config.itemsense);
 
         this.on("input", function (msg) {
-            var itemsense = lib.registerItemsense(node, msg, LocalItemsense);
+            var itemsense = lib.registerItemsense(node, msg, LocalItemsense),
+                jobObject = {
+                    "recipeName": config.recipe,
+                    "durationSeconds": config.runLength,
+                    "playbackLoggingEnabled": false,
+                    "presenceLoggingEnabled": true,
+                    "startDelay": config.startDelay,
+                    "reportToDatabaseEnabled": true,
+                    "reportToMessageQueueEnabled": true,
+                    "reportToFileEnabled": false,
+                    "facility": config.facility
+                };
             Object.keys(jobObject).forEach(function (key) {
-                if (msg.payload && msg.payload[key])
+                if (msg.payload && msg.payload[key] !== undefined)
                     jobObject[key] = msg.payload[key];
             });
-            node.status({fill: "red", shape: "ring", text: "calling Itemsense"});
+            lib.status("enter", "Running Job", node);
             if (itemsense)
                 itemsense.jobs.start(jobObject).then(function (job) {
-                    node.status({});
                     msg.topic = "Job";
                     msg.payload = job;
                     node.send([msg, null, {topic: "success", payload: "Job Starting: " + job.id}]);
+                    lib.status("exit", "", node);
                 }).catch(function (err) {
                     var triage = triageError(err);
+                    console.log("error", err, triage);
+                    lib.status("error", "Failed Running Job", node);
                     if (triage.jobId)
                         node.send([null,
                             lib.extend(msg, {topic: "jobId", payload: {id: triage.jobId}}),

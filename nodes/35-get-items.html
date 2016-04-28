@@ -70,8 +70,9 @@
 <script type="text/x-red" data-help-name="get-items">
     <h3>Gets Items from an Itemsense Instance</h3>
     <p>Expects the Itemsense instance to be in "itemsense" flow variable, as done by the connect node.</p>
-    <p>Uses incoming <code>msg.payload</code> as query parameters if the <code>msg.topic</code> equals "QueryParams", otherwise sets the query
-    params to default.</p>
+    <p>Uses incoming <code>msg.payload</code> as query parameters if the <code>msg.topic</code> equals "QueryParams", or
+     if <code>msg.payload.queryParams</code> exists, uses that object regardless of <code>msg.topic</code>.
+    Otherwise sets the query params to default.</p>
     <p> For repeating operations, if the <code>msg.topic</code> equals "TerminateLoop", then it will stop getting
     items.</p>
     <h4>Outputs</h4>
