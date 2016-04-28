@@ -14,7 +14,7 @@
     "RFID",
     "Itemsense",
     "Impinj",
-    "Node-RED"
+    "node-red"
   ],
   "node-red": {
     "nodes": {
