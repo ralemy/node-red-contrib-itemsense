@@ -43,7 +43,6 @@
     "url": "https://github.com/ralemy/node-red-contrib-itemsense/issues"
   },
   "homepage": "https://github.com/ralemy/node-red-contrib-itemsense#readme",
-  "readme": "# node-red-contrib-itemsense\nNode-RED contribution package that adds nodes which enable the use of Impinj ItemSense IoT Platform\n\nTo learn about using Impinj Itemsense API with Node, see the [Itemsense-node](https://www.npmjs.com/package/itemsense-node) package.\n\n**Nodes depend on _\"itemsense\"_ flow variable. start the flow with a _connect_ node to create the needed\nvariable.** The connect node has a config tab to indicate the Itemsense instance. Alternatively, the `msg.payload` of the incoming message to the connect node can be an object:\n```javascript\nmsg.payload = {\n    itemsenseUrl: \"http://<your Itemsense Instance>[:port]/itemsense\",\n    username: \"<your username>\",\n    password: \"<your password>\"\n};\n```\nin this case the `msg.payload` properties will override the configuration properties. \n\n\nThis can be used to specify the Itemsense instance during runtime by passing the properties in an\nHttp or websocket call.\n\n\n",
   "readmeFilename": "README.md",
   "gitHead": "88fb23a4183204ef1f57bb399cef729a3b1d58b6",
   "_id": "node-red-contrib-itemsense@1.3.0",
