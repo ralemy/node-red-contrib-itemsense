@@ -50,7 +50,7 @@ module.exports = function (RED) {
 
         filterTags(items) {
             const epcReg = this.opts.epcFilter ? new RegExp(this.opts.epcFilter) : null;
-            return this.opts.epcFilter ? _.filter(items, tag=> t.epc.match(epcReg)) : items;
+            return this.opts.epcFilter ? _.filter(items, tag=> tag.epc.match(epcReg)) : items;
         }
 
         sendResponse(response) {
