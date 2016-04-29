@@ -38,7 +38,10 @@ module.exports = function (RED) {
         }
 
         createResponse(tags, nextPageMarker) {
-            this.opts.params.pageMarker = nextPageMarker;
+            if(nextPageMarker)
+                this.opts.params.pageMarker = nextPageMarker;
+            else
+                delete this.opts.params.pageMarker;
             if (nextPageMarker && tags.length < parseInt(this.opts.config.maxTags || 1000))
                 return this.collectTags(tags);
             return {
