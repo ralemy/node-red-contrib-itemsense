@@ -1,0 +1,46 @@
+<script type="text/javascript">
+    RED.nodes.registerType('log-to-fluent',{
+        category: 'Itemsense',
+        color: '#87a980',
+        inputs:1,
+        outputs: 0,
+        align:"right",
+        icon: "impinj.png",
+        label: function() {
+            return this.name||"-> Fluent";
+        },
+        defaults: {
+            name: {value:""},
+            tag: {value:"nodeRed"},
+            host: {value:"127.0.0.1"},
+            port: {value:24224}
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="log-to-fluent">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-tag"><i class="icon-tag"></i> Tag</label>
+        <input type="text" id="node-input-tag" placeholder="Log Tag">
+    </div>
+    <div class="form-row">
+        <label for="node-input-host"><i class="icon-tag"></i> Host</label>
+        <input type="text" id="node-input-host" placeholder="host">
+    </div>
+    <div class="form-row">
+        <label for="node-input-port"><i class="icon-tag"></i> Port</label>
+        <input type="text" id="node-input-port" placeholder="port">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="log-to-fluent">
+    <h3>Sends the payload to Fluent logger</h3>
+    <p>Expects message payload to be a Json object, then emits that with the tag specified in the configuration window
+    to the fluent instance running on the specified host and port.</p>
+    <p> the log will have <code>msg.topic</code> as the last section of the tag.
+    </p>
+</script>
