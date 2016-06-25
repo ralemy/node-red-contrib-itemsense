@@ -1,0 +1,18 @@
+[Unit]
+Description=ItemSense Node-Red Service
+Wants=network.target
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/node-red --settings /usr/local/share/node-red/settings.js
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=itemsense-red
+User=node-red-service
+Group=node-red-service
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+
