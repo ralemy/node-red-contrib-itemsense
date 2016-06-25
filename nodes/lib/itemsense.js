@@ -5,8 +5,9 @@
 
 var _ = require("lodash"),
     Itemsense = require("itemsense-node"),
-    request = require("request");
-q = require("q");
+    request = require("request"),
+    tagRetriever = require("./tag_retriever"),
+    q = require("q");
 
 function stringify(target) {
     try {
@@ -108,8 +109,8 @@ function registerItemsense(node, msg, LocalItemsense) {
             }));
     return itemsense;
 }
-function status(status,title,node){
-    switch(status){
+function status(status, title, node) {
+    switch (status) {
         case "enter":
             return node.status({fill: "yellow", shape: "ring", text: title});
         case "exit":
@@ -118,7 +119,7 @@ function status(status,title,node){
             return node.status({fill: "red", shape: "ring", text: title});
     }
 }
-function getItemsense(node, msg,title) {
+function getItemsense(node, msg, title) {
     var itemsense = msg.itemsense || node.context().flow.get("itemsense");
     if (!itemsense)
         node.error("Itemsense Instance flow variable absent. use a connect node",
@@ -128,7 +129,7 @@ function getItemsense(node, msg,title) {
                 statusCode: 500
             }));
     else
-        status("enter",title,node);
+        status("enter", title, node);
     return itemsense;
 }
 
@@ -157,7 +158,7 @@ function terminateLoop(node, msg, interval) {
 
 var hookedIntoApp = false;
 
-function registerApp(app){
+function registerApp(app) {
     app.use("/itemsense", function (req, res) {
         req.body.uri = req.body.url;
         delete req.body.url;
@@ -170,16 +171,17 @@ function registerApp(app){
     });
 }
 
-module.exports = {
+
+const md = {
     stringify: stringify,
     triageError: triageError,
     padString: padString,
     getProgress: getProgress,
     extend: extend,
     throwNodeError: throwNodeError,
-    raiseNodeRedError:function(title,msg,node,err){
-        throwNodeError(err,title,msg,node);
-        this.status("error",title,node);
+    raiseNodeRedError: function (title, msg, node, err) {
+        throwNodeError(err, title, msg, node);
+        this.status("error", title, node);
         return err;
     },
     getItemsense: getItemsense,
@@ -192,5 +194,8 @@ module.exports = {
             registerApp(RED.httpNode || RED.httpAdmin);
         hookedIntoApp = true;
     },
-    status:status
+    status: status,
+    tagRetriever: (type) => tagRetriever(md,type)
 };
+
+module.exports = md;
