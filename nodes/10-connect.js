@@ -47,7 +47,7 @@ module.exports = function (RED) {
                 return;
             }
             node.context().flow.set("itemsense", itemsense);
-            msg.itemsesne = itemsense;
+            msg.itemsense = itemsense;
             if (itemsense)
                 node.send([msg,
                     {
