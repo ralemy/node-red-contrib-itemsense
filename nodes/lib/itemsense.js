@@ -120,7 +120,7 @@ function status(status, title, node) {
     }
 }
 function getItemsense(node, msg, title) {
-    var itemsense = msg.itemsense || node.context().flow.get("itemsense");
+    var itemsense = node.context().flow.get("itemsense") || msg.itemsense;
     if (!itemsense)
         node.error("Itemsense Instance flow variable absent. use a connect node",
             extend(msg, {
