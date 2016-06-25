@@ -9,13 +9,13 @@ module.exports = function (RED) {
     function LogToFluent(config) {
         RED.nodes.createNode(this, config);
         var node = this;
-        logger.configure(config.tag,{
-            host:config.host,
-            port:config.port
+        logger.configure(config.tag, {
+            host: config.host,
+            port: config.port
         });
 
         this.on("input", function (msg) {
-            logger.emit(msg.topic,msg.payload)
+            logger.emit(((msg.topic || "").toString(), msg.payload)
         });
     }
 
