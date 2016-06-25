@@ -20,7 +20,7 @@ Node-RED contribution package that adds nodes which enable the use of Impinj Ite
 
 ## Sample flows included in the samples directory
 - In the github repo, samples directory contains a README.md file that explains how to use samples
-- There are also other samples, for example instructions on how to run the collection as a service on OSX.
+- There are also other samples, for example instructions on how to run the collection as a service on OSX or Ubuntu Xenial.
     
 ## Setting up for development
 - clone this repository and go to its directory `cd node-red-contrib-itemsense`
