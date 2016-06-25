@@ -15,7 +15,7 @@ module.exports = function (RED) {
         });
 
         this.on("input", function (msg) {
-            logger.emit(((msg.topic || "").toString(), msg.payload)
+            logger.emit(((msg.topic || "").toString()), msg.payload)
         });
     }
 
