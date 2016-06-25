@@ -60,7 +60,7 @@ module.exports = function (RED) {
                     lib.status("exit", "", node);
                 }).catch(function (err) {
                     var triage = triageError(err);
-                    console.log("error", err, triage);
+                    console.log("error", triage);
                     lib.status("error", "Failed Running Job", node);
                     if (triage.jobId)
                         node.send([null,

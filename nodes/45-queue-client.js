@@ -89,6 +89,7 @@ module.exports = function (RED) {
 
         function closeConnection(newConnection) {
             if (connection) {
+                console.log("closing connection")
                 connection.removeListener("error", errorListener);
                 connection.disconnect();
             }
