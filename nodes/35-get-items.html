@@ -28,8 +28,6 @@
                 else
                     $(".repeat-count").hide();
             }
-            function showPageSize(fetch){
-            }
             $("select#call-repeat").change(function(){
                 showRepeats($("select#call-repeat option:selected").val());
             });
@@ -61,7 +59,7 @@
         <input type="text" id="node-input-epcFilter" placeholder="Show tags only if filter applies">
     </div>
     <div class="form-row">
-        <label for="call-repeat"><i class="fa fa-repeat"></i> Fetch Mode </label>
+        <label for="select-fetchMode"><i class="fa fa-repeat"></i> Fetch Mode </label>
         <select id="select-fetchMode" style="width: 73%">
             <option value="count" selected>Count</option>
             <option value="all">All</option>

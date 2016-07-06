@@ -5,8 +5,9 @@
         defaults: {
             name: {value: ""},
             epcFilter: {value: ""},
-            maxTags: {value:2000},
             repeat: {value: "None", required: true},
+            pageSize: {value:100},
+            fetchMode:{value:"count"},
             count: {value: 0},
             interval: {value: 1}
         },
@@ -31,10 +32,19 @@
                 showRepeats($("select#call-repeat option:selected").val());
             });
             $("select#call-repeat").val(this.repeat);
+            $("#select-fetchMode").val(this.fetchMode);
+            $("#select-fetchMode").change(function(ev){
+                var option  = $("#select-fetchMode").val();
+                if(option === "all")
+                    $(".fetch-pageSize").hide();
+                else
+                    $(".fetch-pageSize").show();
+            });
             showRepeats(this.repeat);
         },
         oneditsave:function(){
             $("#node-input-repeat").val( $("select#call-repeat option:selected").val());
+            $("#node-input-fetchMode").val($("#select-fetchMode").val());
         }
     });
 </script>
@@ -47,6 +57,18 @@
     <div class="form-row">
         <label for="node-input-epcFilter"><i class="fa fa-filter"></i> EPC Filter</label>
         <input type="text" id="node-input-epcFilter" placeholder="Show tags only if filter applies">
+    </div>
+    <div class="form-row">
+        <label for="select-fetchMode"><i class="fa fa-repeat"></i> Fetch Mode </label>
+        <select id="select-fetchMode" style="width: 73%">
+            <option value="count" selected>Count</option>
+            <option value="all">All</option>
+        </select>
+        <input type="hidden" id="node-input-fetchMode">
+    </div>
+    <div class="form-row fetch-pageSize">
+        <label for="node-input-pageSize"> Page Size </label>
+        <input type="number" id="node-input-pageSize" min="100">
     </div>
     <div class="form-row">
         <label for="call-repeat"><i class="fa fa-repeat"></i> Repeat </label>
