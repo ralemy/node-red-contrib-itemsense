@@ -14,7 +14,7 @@ class TagRetriever {
                 action: "get",
                 error: "Error in GetItems",
                 topic: "getItems",
-                reponseKey:"items"
+                responseKey:"items"
             },
             history: {
                 action: "getHistory",
