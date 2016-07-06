@@ -13,12 +13,14 @@ class TagRetriever {
             items: {
                 action: "get",
                 error: "Error in GetItems",
-                topic: "getItems"
+                topic: "getItems",
+                reponseKey:"items"
             },
             history: {
                 action: "getHistory",
                 error: "Error In Get Item History",
-                topic: "getHistory"
+                topic: "getHistory",
+                responseKey:"history"
             }
         };
         this.lib = lib;
@@ -43,7 +45,7 @@ class TagRetriever {
         tags = tags || [];
         return this.opts.itemsense.items[this.type.action](this.opts.params)
             .then((response) => {
-                tags = tags.concat(this.filterTags(response.items));
+                tags = tags.concat(this.filterTags(response[this.type.responseKey]));
                 return this.createResponse(tags, response.nextPageMarker);
             });
     }
