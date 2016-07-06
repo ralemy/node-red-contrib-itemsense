@@ -25,7 +25,7 @@ module.exports = function (RED) {
                 count: config.repeat === "Indefinitely" ? -1 : (parseInt(config.count) || 1),
                 node: node,
                 config: config,
-                params: tagRetriever.queryParams(msg.payload || {},msg.topic,config)
+                params: tagRetriever.constructor.queryParams(msg.payload || {},msg.topic,config)
             };
 
             msg.payload = msg.payload || {};
