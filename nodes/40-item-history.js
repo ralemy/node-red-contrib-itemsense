@@ -11,7 +11,7 @@ module.exports = function (RED) {
     function ItemHistoryNode(config) {
         RED.nodes.createNode(this, config);
         const node = this,
-            tagRetriever = lib.tagRetriever("items");
+            tagRetriever = lib.tagRetriever("history");
 
         this.on("input", function (msg) {
             if (msg.topic === "TerminateLoop")
