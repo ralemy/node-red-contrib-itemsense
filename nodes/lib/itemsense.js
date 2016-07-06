@@ -6,6 +6,8 @@
 var _ = require("lodash"),
     Itemsense = require("itemsense-node"),
     request = require("request"),
+    serveStatic = require("serve-static"),
+    path = require("path"),
     tagRetriever = require("./tag_retriever"),
     q = require("q");
 
@@ -173,6 +175,7 @@ function registerApp(app) {
                 res.status(response.statusCode).send(body);
         }).auth(req.body.user, req.body.password);
     });
+    app.use("/vendor",serveStatic(path.join(__dirname,"..","vendor")));
 }
 
 

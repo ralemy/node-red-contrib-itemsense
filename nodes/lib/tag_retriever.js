@@ -61,27 +61,28 @@ class TagRetriever {
         return "error";
     }
 
-    fetchMore(tags){
-        this.opts.node.status({text:`Retrieved ${tags.length} entries`});
+    fetchMore(tags, progress){
+        this.opts.node.status({text:`reading for ${progress}: ${tags.length}`});
         this.opts.node.send([null,{
             topic:"progress",
-            payload:`Retrieved ${tags.length} items so far`
+            payload:`Retrieved ${tags.length} items so far `
         }]);
         return this.collectTags(tags)
     }
     createResponse(tags, next) {
         const config = this.opts.config,
-            shouldFetch = config.fetchMode === "all" ? !!next : next && tags.length < (config.pageSize || 100);
+            shouldFetch = config.fetchMode === "all" ? !!next : next && tags.length < (config.pageSize || 100),
+            progress = this.lib.getProgress(config, this.opts.count);
         if (next)
             this.opts.params.pageMarker = next;
         else
             delete this.opts.params.pageMarker;
         return shouldFetch ?
-            this.fetchMore(tags) :
+            this.fetchMore(tags, progress) :
         {
             items: tags,
             nexPageMarker: next,
-            progress: this.lib.getProgress(config, this.opts.count)
+            progress: progress
         };
     }
 
@@ -91,6 +92,7 @@ class TagRetriever {
     }
 
     sendResponse(response) {
+        this.opts.node.status({text:`${response.progress} done`});
         this.opts.node.send([
             this.lib.extend(this.opts.msg, {
                 topic: this.topic,
