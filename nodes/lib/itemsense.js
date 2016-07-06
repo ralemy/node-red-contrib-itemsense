@@ -133,7 +133,11 @@ function getItemsense(node, msg, title) {
     return itemsense;
 }
 
+
 function terminateLoop(node, msg, interval) {
+    if (!msg)
+        return interval ? clearInterval(interval) : null;
+
     var copy = extend(msg, {
         payload: {
             items: [],
@@ -195,7 +199,13 @@ const md = {
         hookedIntoApp = true;
     },
     status: status,
-    tagRetriever: (type) => tagRetriever(md,type)
+    tagRetriever: (type) => tagRetriever(md, type),
+    terminateGetLoop: (node, msg) => {
+        if (node.tagRetriever)
+            node.tagRetriever.terminateLoop(node, msg);
+        node.tagRetriever = null;
+        node.status({});
+    }
 };
 
 module.exports = md;

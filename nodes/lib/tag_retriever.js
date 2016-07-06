@@ -61,6 +61,14 @@ class TagRetriever {
         return "error";
     }
 
+    fetchMore(tags){
+        this.opts.node.status({text:`Retrieved ${tags.length} entries`});
+        this.opts.node.send([null,{
+            topic:"progress",
+            payload:`Retrieved ${tags.length} items so far`
+        }]);
+        return this.collectTags(tags)
+    }
     createResponse(tags, next) {
         const config = this.opts.config,
             shouldFetch = config.fetchMode === "all" ? !!next : next && tags.length < (config.pageSize || 100);
@@ -69,7 +77,7 @@ class TagRetriever {
         else
             delete this.opts.params.pageMarker;
         return shouldFetch ?
-            this.collectTags(tags) :
+            this.fetchMore(tags) :
         {
             items: tags,
             nexPageMarker: next,

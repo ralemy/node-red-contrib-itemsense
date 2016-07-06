@@ -7,16 +7,17 @@ module.exports = function (RED) {
     "use strict";
     const lib = require("./lib/itemsense");
 
-
     function GetItemsNode(config) {
         RED.nodes.createNode(this, config);
-        const node = this,
-            tagRetriever = lib.tagRetriever("items");
-
+        const node = this;
+        
         this.on("input", function (msg) {
+            lib.terminateGetLoop(node,msg);
 
             if (msg.topic === "TerminateLoop")
-                return tagRetriever.terminateLoop(node, msg);
+                return;
+
+            node.tagRetriever = lib.tagRetriever("items");
 
             var opts = {
                 epcFilter: config.epcFilter,
@@ -25,19 +26,22 @@ module.exports = function (RED) {
                 count: config.repeat === "Indefinitely" ? -1 : (parseInt(config.count) || 1),
                 node: node,
                 config: config,
-                params: tagRetriever.constructor.queryParams(msg.payload || {},msg.topic,config)
+                params: node.tagRetriever.constructor.queryParams(msg.payload || {},msg.topic,config)
             };
 
             msg.payload = msg.payload || {};
             if (opts.itemsense)
-                tagRetriever.setOpts(opts).getTags().then((err)=> {
+                node.tagRetriever.setOpts(opts).getTags().then((err)=> {
                     if (err)
                         return;
                     if (config.repeat === "None")
                         node.status({});
                     else
-                        tagRetriever.getByInterval();
+                        node.tagRetriever.getByInterval();
                 }).catch(lib.raiseNodeRedError.bind(lib, "Error Getting Tags", msg, node));
+        });
+        node.on("close", function () {
+            lib.terminateGetLoop(node);
         });
     }
 
