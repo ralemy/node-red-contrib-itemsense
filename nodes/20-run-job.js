@@ -6,7 +6,6 @@ module.exports = function (RED) {
     "use strict";
 
     var lib = require("./lib/itemsense");
-
     lib.hookIntoApp(RED);
 
     function triageError(err) {
