@@ -6,9 +6,9 @@
             name: {value: ""},
             itemsense: {value: "", type: "itemsense-instance", required:false},
             recipe: {value: ""},
-            runLength: {value: 30, required: true},
             startDelay: {value: "PT0S", required: true},
-            facility: {value: "DEFAULT"}
+            facility: {value: "DEFAULT"},
+            playback: {value: false}
         },
         inputs: 1,
         outputs: 3,
@@ -101,24 +101,21 @@
         <input type="hidden" id="node-input-recipe">
         <span id="no-recipe"> No Itemsense Instance defined</div>
     </div>
-
-
-
-
-
-
-
+    <div class="form-row">
+        <label for="node-input-playback"><i class="fa fa-check-square-o"></i> Enable Playback Logs</label>
+        <input type="checkbox" id="node-input-playback">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="run-job">
     <h3>Starts a job on Itemsense</h3>
-    <p> The Itemsense instance to start a job is extracted from the flow context "itemsense" key. Alternatively, the
+    <p> The Itemsense instance on which to start a job is extracted from the flow context "itemsense" key. Alternatively, the
     incoming message can have the <code>msg.payload.itemsenseUrl</code> and username and password to create an Itemsense
     connection, or the connection will be taken from the node configuration.</p>
-    <p>the incoming message
+    <p>The incoming message
     can optionally have job parameters in <code>msg.payload</code> object to modify the parameters of the job.
     If the <code>msg.payload</code> lacks a
-    parameter, for example the recipe name, that parameter is taken from the config. the user needs to make sure that the
+    parameter, for example the recipe name, that parameter is taken from the config. The user needs to make sure that the
     parameters in the configuration tab will work with the incoming itemsense object if they are not explicitly specified
     in the input message.
     </p>
@@ -131,4 +128,5 @@
     <p> The Third output is intended for debug and logging. the <code>msg.topic</code> reflects the "success" or "failure"
     of the operation, and the <code>msg.payload</code> containing a human readable message about the results of the
     operation</p>
+
 </script>
