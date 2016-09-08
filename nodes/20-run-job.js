@@ -32,13 +32,12 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         var node = this,
             LocalItemsense = RED.nodes.getNode(config.itemsense);
-
         this.on("input", function (msg) {
             var itemsense = lib.registerItemsense(node, msg, LocalItemsense),
                 jobObject = {
                     "recipeName": config.recipe,
                     "durationSeconds": config.runLength,
-                    "playbackLoggingEnabled": false,
+                    "playbackLoggingEnabled": config.playback,
                     "presenceLoggingEnabled": true,
                     "startDelay": config.startDelay,
                     "reportToDatabaseEnabled": true,
@@ -47,8 +46,9 @@ module.exports = function (RED) {
                     "facility": config.facility
                 };
             Object.keys(jobObject).forEach(function (key) {
-                if (msg.payload && msg.payload[key] !== undefined)
+                if (msg.payload && msg.payload[key] !== undefined){
                     jobObject[key] = msg.payload[key];
+                  }
             });
             lib.status("enter", "Running Job", node);
             if (itemsense)
