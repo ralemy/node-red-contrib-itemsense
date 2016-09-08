@@ -4,8 +4,9 @@
         color: '#efeb6d',
         defaults: {
             name: {value: ""},
-            itemsense: {value: "", type: "itemsense-instance", required:false},
+            itemsense: {value: "", type: "itemsense-instance", required: false},
             recipe: {value: ""},
+            runLength: {value: 300, required: true},
             startDelay: {value: "PT0S", required: true},
             facility: {value: "DEFAULT"},
             playback: {value: false}
@@ -19,11 +20,11 @@
         oneditprepare: function () {
             var current = this.itemsense || $("#node-input-itemsense option:selected").val();
 
-            function populateRecipes(){
+            function populateRecipes() {
                 window.relayCall({
                     itemsense: RED.nodes.node(current),
                     url: "/configuration/v1/recipes/show",
-                    success:window.populateSelect({
+                    success: window.populateSelect({
                         container: "recipe-name",
                         parameter: "node-input-recipe",
                         selector: "recipe-selector",
@@ -32,11 +33,11 @@
                 });
             }
 
-            function populateFacilities(){
+            function populateFacilities() {
                 window.relayCall({
                     itemsense: RED.nodes.node(current),
                     url: "/configuration/v1/facilities/show",
-                    success:window.populateSelect({
+                    success: window.populateSelect({
                         container: "facility-name",
                         parameter: "node-input-facility",
                         selector: "facility-selector",
@@ -45,27 +46,41 @@
                 });
             }
 
-            function removeSelections(){
+            function removeSelections() {
                 $("#no-recipe").show();
                 $("#recipe-name").html("");
                 $("#no-facility").show();
                 $("#facility-name").html("");
             }
-            function populateSelections(){
+
+            function populateSelections() {
                 populateRecipes();
                 populateFacilities();
             }
-            function queryItemsense(newIS){
+
+            function queryItemsense(newIS) {
                 current = newIS;
                 if (current.indexOf("_ADD_") !== -1)
                     removeSelections();
                 else
                     populateSelections();
             }
+
+            function syncLabel(check){
+                $("#toggle-playback-logs").html(check ? "Playback Logs Enabled" : "Playback Logs Disabled");
+            }
             $("#node-input-itemsense").change(function () {
                 var newIS = $("#node-input-itemsense option:selected").val();
                 if (current !== newIS)
-                        queryItemsense(newIS);
+                    queryItemsense(newIS);
+            });
+            $("#toggle-playback-logs").click(function () {
+                var check = !$("#node-input-playback").prop("checked");
+                $("#node-input-playback").prop("checked", check);
+                syncLabel(check);
+            });
+            $("#node-input-playback").change(function(){
+                syncLabel($("#node-input-playback").prop("checked"));
             });
             queryItemsense(current);
         }
@@ -102,9 +117,10 @@
         <span id="no-recipe"> No Itemsense Instance defined</div>
     </div>
     <div class="form-row">
-        <label for="node-input-playback"><i class="fa fa-check-square-o"></i> Enable Playback Logs</label>
-        <input type="checkbox" id="node-input-playback">
+        <input style="width:100px;" type="checkbox" id="node-input-playback">
+        <span id="toggle-playback-logs" style="cursor:pointer">Playback Logs Disabled</span>
     </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="run-job">
@@ -128,5 +144,6 @@
     <p> The Third output is intended for debug and logging. the <code>msg.topic</code> reflects the "success" or "failure"
     of the operation, and the <code>msg.payload</code> containing a human readable message about the results of the
     operation</p>
+
 
 </script>
