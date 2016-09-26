@@ -10,9 +10,9 @@ module.exports = function (RED) {
     function GetItemsNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
-        
+
         this.on("input", function (msg) {
-            lib.terminateGetLoop(node,msg);
+            lib.terminateGetLoop(node, msg);
 
             if (msg.topic === "TerminateLoop")
                 return;
@@ -26,7 +26,7 @@ module.exports = function (RED) {
                 count: config.repeat === "Indefinitely" ? -1 : (parseInt(config.count) || 1),
                 node: node,
                 config: config,
-                params: node.tagRetriever.constructor.queryParams(msg.payload || {},msg.topic,config)
+                params: node.tagRetriever.constructor.queryParams(msg.payload || {}, msg.topic, config)
             };
 
             msg.payload = msg.payload || {};
@@ -38,7 +38,10 @@ module.exports = function (RED) {
                         node.status({});
                     else
                         node.tagRetriever.getByInterval();
-                }).catch(lib.raiseNodeRedError.bind(lib, "Error Getting Tags", msg, node));
+                }).catch(lib.raiseNodeRedError.bind(lib, "Error Getting Tags", msg, node))
+                    .finally(()=> {
+                        node.tagRetriever = null;
+                    });
         });
         node.on("close", function () {
             lib.terminateGetLoop(node);

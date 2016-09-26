@@ -38,7 +38,10 @@ module.exports = function (RED) {
                         node.status({});
                     else
                         node.tagRetriever.getByInterval();
-                }).catch(lib.raiseNodeRedError.bind(lib, "Error getting tag history", msg, node));
+                }).catch(lib.raiseNodeRedError.bind(lib, "Error getting tag history", msg, node))
+                    .finally(()=>{
+                        node.tagRetriever=null;
+                    });
         });
         node.on("close", function () {
             lib.terminateGetLoop(node);
