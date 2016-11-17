@@ -52,7 +52,7 @@
   "dependencies": {
     "amqp": "^0.2.4",
     "fluent-logger": "^1.1.1",
-    "itemsense-node": "^1.3.0-a",
+    "itemsense-node": "1.0.7",
     "lodash": "^4.6.1",
     "q": "^1.4.1",
     "request": "^2.70.0",

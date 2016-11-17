@@ -23,7 +23,7 @@
 
             var optionString = "";
             list.forEach(function (r) {
-                optionString += "<option value='" + r.name + "' " +
+                optionString += "<option value='" + r[key] + "' " +
                         (r[key] === parameter.val() ? "selected" : "") + ">" + r[value] + "</option>";
             });
             if (!optionString)
