@@ -31,6 +31,7 @@
       "delete-object": "nodes/60-delete-object.js",
       "current-zone": "nodes/65-current-zone.js",
       "dump-config": "nodes/70-dump-config.js",
+      "load-config": "nodes/85-load-config.js",
       "json-output": "nodes/75-json-output.js",
       "log-fluent": "nodes/76-log-to-fluent.js",
       "itemsense-instance": "nodes/80-itemsense-instance.js"
@@ -57,6 +58,7 @@
     "q": "^1.4.1",
     "request": "^2.70.0",
     "serve-static": "^1.11.1",
-    "string_decoder": "^0.10.31"
+    "string_decoder": "^0.10.31",
+    "is-tool": "^0.2.0"
   }
 }
