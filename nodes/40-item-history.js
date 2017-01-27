@@ -12,7 +12,7 @@ module.exports = function (RED) {
         const node = this;
 
         this.on("input", function (msg) {
-            lib.terminateGetLoop(node,msg);
+            lib.terminateGetLoop(node, msg);
 
             if (msg.topic === "TerminateLoop")
                 return;
@@ -39,8 +39,9 @@ module.exports = function (RED) {
                     else
                         node.tagRetriever.getByInterval();
                 }).catch(lib.raiseNodeRedError.bind(lib, "Error getting tag history", msg, node))
-                    .finally(()=>{
-                        node.tagRetriever=null;
+                    .finally(() => {
+                        if (config.repeat === "None")
+                            node.tagRetriever = null;
                     });
         });
         node.on("close", function () {

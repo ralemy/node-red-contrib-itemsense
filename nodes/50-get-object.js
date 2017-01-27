@@ -61,6 +61,9 @@ module.exports = function (RED) {
                     sendOutput(config.outputMode, msg, title, name);
                 }).catch(lib.raiseNodeRedError.bind(lib, "Itemsense Error get " + title, msg, node));
         });
+        node.on("close",function(msg){
+
+        });
     }
 
     RED.nodes.registerType("get-object", GetObjectNode);

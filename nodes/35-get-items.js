@@ -31,19 +31,22 @@ module.exports = function (RED) {
 
             msg.payload = msg.payload || {};
             if (opts.itemsense)
-                node.tagRetriever.setOpts(opts).getTags().then((err)=> {
-                    if (err)
-                        return;
-                    if (config.repeat === "None")
-                        node.status({});
-                    else
-                        node.tagRetriever.getByInterval();
-                }).catch(lib.raiseNodeRedError.bind(lib, "Error Getting Tags", msg, node))
-                    .finally(()=> {
-                        node.tagRetriever = null;
+                node.tagRetriever.setOpts(opts).getTags()
+                    .then((err) => {
+                        if (err)
+                            return;
+                        if (config.repeat === "None")
+                            node.status({});
+                        else
+                            node.tagRetriever.getByInterval();
+                    })
+                    .catch(lib.raiseNodeRedError.bind(lib, "Error Getting Tags", msg, node))
+                    .finally(() => {
+                        if(config.repeat === "None")
+                            node.tagRetriever = null;
                     });
         });
-        node.on("close", function () {
+        this.on("close", function () {
             lib.terminateGetLoop(node);
         });
     }
