@@ -4,17 +4,21 @@
         color: '#efeb6d',
         defaults: {
             name: {value:""},
-            fromZone: {value:""},
-            toZone: {value:""},
-            epc: {value:""}
+            queueType:{value:"items", required:true}
         },
         inputs:1,
         outputs:3,
         icon: "impinj.png",
         label: function() {
-            return this.name||"Message Queue";
+            return this.name||(this.queueType + " Queue");
+        },
+        oneditprepare:function(){
+            $("select#queue-type").val(this.queueType);
+        },
+        oneditsave:function(){
+            $("#node-input-queue-type").val( $("select#queue-type option:selected").val());
         }
-    });
+        });
 </script>
 
 <script type="text/x-red" data-template-name="queue-client">
@@ -23,27 +27,22 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-row">
-        <label for="node-input-fromZone"><i class="icon-tag"></i> From Zone</label>
-        <input type="text" id="node-input-fromZone" placeholder="From Zone Name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-toZone"><i class="icon-tag"></i> To Zone</label>
-        <input type="text" id="node-input-toZone" placeholder="To Zone Name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-epc"><i class="icon-tag"></i> EPC Filter</label>
-        <input type="text" id="node-input-epc" placeholder="EPC Filter">
+        <label for="queue-type"><i class="fa fa-repeat"></i> Queue Type </label>
+        <select id="queue-type" style="width: 73%">
+            <option value="items" selected>Item</option>
+            <option value="health">Health</option>
+        </select>
+        <input type="hidden" id="node-input-queue-type">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="queue-client">
-    <h3>Subscribes to and consumes from an Itemsense AMQP message queue</h3>
+    <h3>Subscribes to and consumes from an Itemsense AMQP message queue for Health or Items</h3>
     <p>Gets the Itemsense object from "itemsense" flow context variable, so should be downstream to a component (such
     as the connect node) that creates that variable.</p>
     <p>If the incoming message has a <code>msg.topic = "CloseConnection"</code> then it will close the previously opened connection</p>
     <p>The node parameters can be passed to it using <code>msg.payload</code>, i.e. in an object that has keys for
-    <code>fromZone, toZone, and/or epc</code>. if msg.payload does not contain a parameter, that parameter is read
-    from the node configuration. All parameters are optional.</p>
+    <code>fromZone, toZone, epc, etc (see http://developer.impinj.com)</code>. All parameters are optional.</p>
     <p> The first output will emit a message once the queue is listening. this is usually used to start a job.</p>
     <p> The second output will be fired at each message arrival. it will have a <code>msg.topic="AMQPMessage"</code> and
     the message will be in <code>msg.payload</code>. </p>

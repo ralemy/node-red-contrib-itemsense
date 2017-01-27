@@ -19,9 +19,12 @@ module.exports = function (RED) {
             nodeClosing = false;
 
         function getQueueParameters(payload) {
-            return _.reduce(["toZone", "fromZone", "epc"], function (r, k) {
-                if (config[k])
-                    r[k] = config[k];
+
+            let keys = config.queueType === "Items"
+                ? ["fromFacility", "toFacility","toZone", "fromZone", "epc", "distance","zoneTransitionsOnly"]
+                : ["readerName","type","code"];
+
+            return _.reduce(keys, function (r, k) {
                 if (payload[k])
                     r[k] = payload[k];
                 return r;
@@ -136,7 +139,7 @@ module.exports = function (RED) {
                 node.send([msg, null, {topic: "success", payload: "connection closed"}]);
             }
             else if (itemsense)
-                itemsense.messageQueue.configure(channelQP)
+                itemsense[config.queueType].configureQueue(channelQP)
                     .then(waitForMessages)
                     .then(clearStatus,reportError,announceMsg)
                     .catch(reportError);
