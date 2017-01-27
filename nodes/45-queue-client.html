@@ -16,7 +16,7 @@
             $("select#queue-type").val(this.queueType);
         },
         oneditsave:function(){
-            $("#node-input-queue-type").val( $("select#queue-type option:selected").val());
+            $("#node-input-queueType").val( $("select#queue-type option:selected").val());
         }
         });
 </script>
@@ -32,7 +32,7 @@
             <option value="items" selected>Item</option>
             <option value="health">Health</option>
         </select>
-        <input type="hidden" id="node-input-queue-type">
+        <input type="hidden" id="node-input-queueType">
     </div>
 </script>
 
