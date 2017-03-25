@@ -19,7 +19,6 @@ module.exports = function (RED) {
             nodeClosing = false;
 
         function getQueueParameters(payload) {
-
             let keys = config.queueType === "Items"
                 ? ["fromFacility", "toFacility","toZone", "fromZone", "epc", "distance","zoneTransitionsOnly"]
                 : ["readerName","type","code"];
