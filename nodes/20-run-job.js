@@ -37,7 +37,6 @@ module.exports = function (RED) {
                 jobObject = {
                     "recipeName": config.recipe,
                     "durationSeconds": config.runLength,
-                    "playbackLoggingEnabled": config.playback,
                     "presenceLoggingEnabled": true,
                     "startDelay": config.startDelay,
                     "reportToDatabaseEnabled": true,
