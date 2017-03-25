@@ -1,0 +1,44 @@
+<script type="text/javascript">
+  RED.nodes.registerType('load-config',{
+    category: 'Itemsense',
+    color: '#efeb6d',
+    defaults: {
+      name: {value:""},
+    },
+    inputs:1,
+    outputs:2,
+    icon: "impinj.png",
+    label: function() {
+      return this.name || "load-config";
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="load-config">
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="load-config">
+  <h3>Load Itemsense configuration object</h3>
+  <p>Reads the Itemsense instance from the "itemsense" variable of the flow context, such as one created by a connect node. The <code>msg.payload</code> should contain a JSON object with 1 or more of the following keys:
+  <ul>
+    <li>"facilities"</li>
+    <li>"readerDefinitions"</li>
+    <li>"readerConfigurations"</li>
+    <li>"recipes"</li>
+    <li>"zoneMaps"</li>
+    <li>"users"</li>
+  </ul>
+  Each of these keys should then contain and area of one or more objects of the appropriate format.
+  If the configuration object already exists, it is updated. </p>
+  <p>
+    The first output contains the response from the server if the call was successful.
+  </p>
+  <p>
+    The second output is for logging and debugging, contains a <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
+    of the operation.
+  </p>
+</script>
