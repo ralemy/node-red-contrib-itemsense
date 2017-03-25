@@ -19,7 +19,7 @@ module.exports = function (RED) {
             nodeClosing = false;
 
         function getQueueParameters(payload) {
-            return _.reduce(["toZone", "fromZone", "epc"], function (r, k) {
+            return _.reduce(["toZone", "fromZone", "epc", "zoneTransitionsOnly"], function (r, k) {
                 if (config[k])
                     r[k] = config[k];
                 if (payload[k])
