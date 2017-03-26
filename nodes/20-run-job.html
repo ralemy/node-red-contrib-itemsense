@@ -8,8 +8,7 @@
             recipe: {value: ""},
             runLength: {value: 300, required: true},
             startDelay: {value: "PT0S", required: true},
-            facility: {value: "DEFAULT"},
-            playback: {value: false}
+            facility: {value: "DEFAULT"}
         },
         inputs: 1,
         outputs: 3,
@@ -66,22 +65,13 @@
                     populateSelections();
             }
 
-            function syncLabel(check){
-                $("#toggle-playback-logs").html(check ? "Playback Logs Enabled" : "Playback Logs Disabled");
-            }
+
             $("#node-input-itemsense").change(function () {
                 var newIS = $("#node-input-itemsense option:selected").val();
                 if (current !== newIS)
                     queryItemsense(newIS);
             });
-            $("#toggle-playback-logs").click(function () {
-                var check = !$("#node-input-playback").prop("checked");
-                $("#node-input-playback").prop("checked", check);
-                syncLabel(check);
-            });
-            $("#node-input-playback").change(function(){
-                syncLabel($("#node-input-playback").prop("checked"));
-            });
+
             queryItemsense(current);
         }
     });
@@ -115,10 +105,6 @@
         <span id="recipe-name"></span>
         <input type="hidden" id="node-input-recipe">
         <span id="no-recipe"> No Itemsense Instance defined</div>
-    </div>
-    <div class="form-row">
-        <input style="width:100px;" type="checkbox" id="node-input-playback">
-        <span id="toggle-playback-logs" style="cursor:pointer">Playback Logs Disabled</span>
     </div>
 
 </script>
