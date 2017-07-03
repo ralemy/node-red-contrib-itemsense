@@ -24,7 +24,7 @@ module.exports = function (RED) {
                 : ["readerName","type","code"];
 
             return _.reduce(keys, function (r, k) {
-                if (payload[k])
+                if (payload.hasOwnProperty(k))
                     r[k] = payload[k];
                 return r;
             }, {});
