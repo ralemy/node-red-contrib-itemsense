@@ -38,6 +38,7 @@
     };
     window.relayCall = function (opts) {
         var base = (RED.settings.httpNodeRoot || RED.settings.httpAdminRoot || "").replace(/\/$/,""),
+            itemSenseApiPath = RED.settings.itemSenseApiPath || "/itemsense",
                 itemsense = opts.itemsense,
                 url = opts.url,
                 method = opts.method || "GET",
@@ -47,7 +48,7 @@
                             window.alert("error" + JSON.stringify(arguments, null, " "));
                         };
         $.ajax({
-            url: base + "/itemsense",
+            url: base + itemSenseApiPath,
             method: "POST",
             dataType: "json",
             data: {

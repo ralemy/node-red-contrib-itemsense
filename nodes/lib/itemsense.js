@@ -164,8 +164,9 @@ function terminateLoop(node, msg, interval) {
 
 var hookedIntoApp = false;
 
-function registerApp(app) {
-    app.use("/itemsense", function (req, res) {
+function registerApp(app,settings) {
+    const itemSenseApiPath = settings.itemSenseApiPath || "/itemsense";
+    app.use(itemSenseApiPath, function (req, res) {
         req.body.uri = req.body.url;
         delete req.body.url;
         request(req.body, function (err, response, body) {
@@ -198,7 +199,7 @@ const md = {
     registerItemsense: registerItemsense,
     hookIntoApp: function (RED) {
         if (!hookedIntoApp)
-            registerApp(RED.httpNode || RED.httpAdmin);
+            registerApp(RED.httpNode || RED.httpAdmin, RED.settings);
         hookedIntoApp = true;
     },
     status: status,

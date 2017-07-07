@@ -23,7 +23,7 @@ const Decorator = {
     padString(value, padcount, padchar){
         var s = value.toString(),
             p = "";
-        for (i = 0; i < padcount - s.length; i++)
+        for (let i = 0; i < padcount - s.length; i++)
             p += padchar;
         return p + s;
     },
@@ -196,8 +196,9 @@ class ErrorDecorator {
 
 var hookedIntoApp = false;
 
-function registerApp(app) {
-    app.use("/itemsense", function (req, res) {
+function registerApp(app, settings) {
+    const itemSenseApiPath = settings.itemSenseApiPath || "/itemsense";
+    app.use(itemSenseApiPath, function (req, res) {
         req.body.uri = req.body.url;
         delete req.body.url;
         request(req.body, function (err, response, body) {
@@ -213,7 +214,7 @@ function registerApp(app) {
 
 function hookIntoApp(RED) {
     if (!hookedIntoApp && RED)
-        registerApp(RED.httpNode || RED.httpAdmin);
+        registerApp(RED.httpNode || RED.httpAdmin, RED.settings);
 }
 
 module.exports = function (RED) {
