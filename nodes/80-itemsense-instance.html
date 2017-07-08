@@ -38,7 +38,7 @@
     };
     window.relayCall = function (opts) {
         var base = (RED.settings.httpNodeRoot || RED.settings.httpAdminRoot || "").replace(/\/$/,""),
-            itemSenseApiPath = RED.settings.itemSenseApiPath || "/itemsense",
+            itemSenseApiPath = "itmsns",
                 itemsense = opts.itemsense,
                 url = opts.url,
                 method = opts.method || "GET",

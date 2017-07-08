@@ -165,7 +165,7 @@ function terminateLoop(node, msg, interval) {
 var hookedIntoApp = false;
 
 function registerApp(app,settings) {
-    const itemSenseApiPath = settings.itemSenseApiPath || "/itemsense";
+    const itemSenseApiPath =  "/itmsns";
     app.use(itemSenseApiPath, function (req, res) {
         req.body.uri = req.body.url;
         delete req.body.url;
