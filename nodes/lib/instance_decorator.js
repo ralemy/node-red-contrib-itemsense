@@ -184,7 +184,33 @@ function addSNMP(instance) {
     }
 }
 
+function addHealth(instance){
+    const makeRequest = instance._itemsenseService.makeRequest.bind(instance._itemsenseService);
+    const urlPath = "/health/v1/readers";
+    instance.readerHealth = {
+        get: (id) => makeRequest(
+            {getRequestUrl: () => `${urlPath}/${id}`},
+            {method: "GET"}
+        ),
+        getAll: () => makeRequest(
+            {getRequestUrl: () => urlPath},
+            {method: "GET"}
+        )
+    };
+    instance.healthEvents = {
+        get: (id,body) => makeRequest(
+            {getRequestUrl: () => `/health/v1/events`},
+            {method: "POST"},
+            body
+        ),
+        getAll: (id,body) => makeRequest(
+            {getRequestUrl: () => "/health/v1/events"},
+            {method: "POST"},
+            body
+        )
+    };
 
+}
 function decorateInstance(instance) {
     addReaderGroups(instance);
     addReaderFeatures(instance);
@@ -194,6 +220,7 @@ function decorateInstance(instance) {
     addTransitionItems(instance);
     addSupport(instance);
     addSNMP(instance);
+    addHealth(instance);
     return instance;
 }
 

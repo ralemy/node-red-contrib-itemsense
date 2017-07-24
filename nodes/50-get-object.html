@@ -1,17 +1,17 @@
 <script type="text/javascript">
-    RED.nodes.registerType('get-object',{
+    RED.nodes.registerType('get-object', {
         category: 'Itemsense',
         color: '#efeb6d',
         defaults: {
-            name: {value:""},
-            objectType: {value:"recipes",required:true},
-            outputMode:{value:"array",required:true}
+            name: {value: ""},
+            objectType: {value: "recipes", required: true},
+            outputMode: {value: "array", required: true}
         },
-        inputs:1,
-        outputs:2,
+        inputs: 1,
+        outputs: 2,
         icon: "impinj.png",
-        label: function() {
-            return this.name||"Get "+this.objectType;
+        label: function () {
+            return this.name || "Get " + this.objectType;
         },
         oneditprepare: function () {
             $("#object-types").val(this.objectType);
@@ -37,12 +37,14 @@
             <option value="readerConfigurations">Reader Configurations</option>
             <option value="readerDefinitions">Reader Definitions</option>
             <option value="readerGroups">Reader Groups</option>
+            <option value="readerHealth">Reader Health</option>
             <option value="thresholds">Threshold Configurations</option>
             <option value="thresholdAntennaConfigurations">Threshold Antenna Configurations</option>
             <option value="facilities">Facilities</option>
             <option value="zoneMaps">Zone Maps</option>
             <option value="users">Users</option>
-            <option value="SNMP">SNMP</option>
+            <option value="healthEvents">Health Events</options>
+           <option value="SNMP">SNMP</option>
         </select>
         <input type="hidden" id="node-input-objectType">
     </div>
@@ -54,6 +56,7 @@
         </select>
         <input type="hidden" id="node-input-outputMode">
     </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="get-object">
@@ -73,4 +76,5 @@
      an <code>index</code> which shows the index of the
      object being sent in the first output, and a <code>count</code> property that shows how many objects are in the collection
      in total.</p>
+
 </script>

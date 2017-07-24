@@ -61,7 +61,7 @@ module.exports = function (RED) {
                 title = (key ? key + " from" : "all") + " " + config.objectType,
                 itemsense = lib.getItemsense(node, msg, "Retracting " + title);
             if (itemsense)
-                itemsense[config.objectType][action](key).then(function (object) {
+                itemsense[config.objectType][action](key, msg.payload).then(function (object) {
                     lib.status("exit", "", node);
                     msg.payload = key ? [object] : object;
                     msg.topic = config.objectType;
