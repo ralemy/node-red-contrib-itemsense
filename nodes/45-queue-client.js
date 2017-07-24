@@ -4,7 +4,7 @@
  */
 module.exports = function (RED) {
     "use strict";
-    var lib = require("./lib/itemsense"),
+    const lib = require("./lib/itemsense"),
         q = require("q"),
         amqp = require("amqp"),
         _ = require("lodash"),
@@ -13,17 +13,23 @@ module.exports = function (RED) {
 
     function QueueClientNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this,
+        let node = this,
             connection = null,
             errorListener = null,
             nodeClosing = false;
 
+        function getPayloadKeys(){
+            switch(config.queueType){
+                case "items":
+                    return ["fromFacility", "toFacility","toZone", "fromZone", "epc", "distance","zoneTransitionsOnly","jobId"];
+                case "transitions":
+                    return ["threshold","jobId"];
+                default:
+                    return ["readerName","type","code"];
+            }
+        }
         function getQueueParameters(payload) {
-            let keys = config.queueType === "items"
-                ? ["fromFacility", "toFacility","toZone", "fromZone", "epc", "distance","zoneTransitionsOnly"]
-                : ["readerName","type","code"];
-
-            return _.reduce(keys, function (r, k) {
+            return _.reduce(getPayloadKeys(), function (r, k) {
                 if (payload.hasOwnProperty(k))
                     r[k] = payload[k];
                 return r;
@@ -49,7 +55,7 @@ module.exports = function (RED) {
         }
 
         function consumeQueue(newConnection, queue) {
-            var defer = q.defer();
+            const defer = q.defer();
             closeConnection(newConnection);
 
             connection.once("ready", function () {
@@ -126,7 +132,7 @@ module.exports = function (RED) {
             node.status({});
         }
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg,"Registering Queue"),
+            const itemsense = lib.getItemsense(node, msg,"Registering Queue"),
                 channelQP = getQueueParameters(msg.payload || {}),
                 waitForMessages = amqpListener.bind(node,itemsense),
                 announceMsg = notify.bind(node, msg),
@@ -138,7 +144,7 @@ module.exports = function (RED) {
                 node.send([msg, null, {topic: "success", payload: "connection closed"}]);
             }
             else if (itemsense)
-                itemsense[config.queueType].configureQueue(channelQP)
+                itemsense.queueTypes[config.queueType](channelQP)
                     .then(waitForMessages)
                     .then(clearStatus,reportError,announceMsg)
                     .catch(reportError);

@@ -51,7 +51,7 @@ module.exports = function (RED) {
         function getKey(msg){
             if(!msg.payload)
                 return null;
-            if(config.objectType === "thresholdAntennaConfigurations")
+            if(["thresholdAntennaConfigurations","thresholds"].includes(config.objectType))
                 return msg.payload.id;
             return msg.payload.name;
         }

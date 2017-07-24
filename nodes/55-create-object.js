@@ -11,7 +11,7 @@ module.exports = function (RED) {
         var node = this;
 
         function getAction(payload){
-            if(config.objectType === "thresholdAntennaConfigurations")
+            if(["thresholdAntennaConfigurations","thresholds"].includes(config.objectType))
                 return payload.id ? "replace" : "create";
             return "update";
         }

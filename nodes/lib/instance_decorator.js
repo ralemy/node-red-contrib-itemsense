@@ -64,11 +64,62 @@ function addThresholdAntennaConfigurations(instance){
     }
 }
 
+function addThresholdConfigurations(instance){
+    const makeRequest = instance._itemsenseService.makeRequest.bind(instance._itemsenseService);
+    const urlPath = "/configuration/v1/thresholds";
+    instance.thresholds = {
+        get: (id) => makeRequest(
+            {getRequestUrl:()=> `${urlPath}/${id}` },
+            {method:"GET"}
+        ),
+        getAll:()=> makeRequest(
+            {getRequestUrl:()=> urlPath},
+            {method:"GET"}
+        ),
+        create:(body)=>makeRequest(
+            {getRequestUrl:()=>urlPath},
+            {method:"POST"},
+            body
+        ),
+        replace:(body,id)=>makeRequest(
+            {getRequestUrl:()=>`${urlPath}/${id}`},
+            {method:"PUT"},
+            body
+        ),
+        delete:(id) =>makeRequest(
+            {getRequestUrl:()=>`${urlPath}/${id}`},
+            {method:"DELETE"}
+        )
+    }
+}
+
+function addMessaggeQueues(instance){
+    const makeRequest = instance._itemsenseService.makeRequest.bind(instance._itemsenseService);
+    instance.queueTypes={
+        items:payload => makeRequest(
+            {getRequestUrl:()=> "/data/v1/items/queues"},
+            {method:"PUT"},
+            payload
+        ),
+        transitions:payload => makeRequest(
+            {getRequestUrl:()=> "/data/v1/items/queues/threshold"},
+            {method:"PUT"},
+            payload
+        ),
+        health:payload => makeRequest(
+            {getRequestUrl:()=> "/health/v1/events/queues"},
+            {method:"PUT"},
+            payload
+        ),
+}
+}
 
 function decorateInstance(instance) {
     addReaderGroups(instance);
     addReaderFeatures(instance);
+    addThresholdConfigurations(instance);
     addThresholdAntennaConfigurations(instance);
+    addMessageQueues(instance);
     return instance;
 }
 
