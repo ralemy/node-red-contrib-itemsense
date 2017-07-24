@@ -19,11 +19,11 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            const key = getKey(msg),
+            const key = getKey(msg) || "",
                 itemsense = lib.getItemsense(node, msg, "delete " + key + " from " + config.objectType),
                 error ="No Name/id Provided in payload.name";
             if (itemsense)
-                if (!key)
+                if (!key && config.objectType !== "SNMP")
                     lib.raiseNodeRedError(error,msg,node,{message:error});
                 else if (itemsense[config.objectType].delete)
                     itemsense[config.objectType].delete(key, msg.payload.replacementId).then(function (object) {

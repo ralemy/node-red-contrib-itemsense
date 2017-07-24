@@ -160,6 +160,31 @@ function addSupport(instance) {
     }
 }
 
+function addSNMP(instance) {
+    const makeRequest = instance._itemsenseService.makeRequest.bind(instance._itemsenseService);
+    const urlPath = "/configuration/v1/settings/SNMP";
+    instance.SNMP = {
+        get: () => makeRequest(
+            {getRequestUrl: () => `${urlPath}`},
+            {method: "GET"}
+        ),
+        getAll: () => makeRequest(
+            {getRequestUrl: () => urlPath},
+            {method: "GET"}
+        ),
+        update: (body) => makeRequest(
+            {getRequestUrl: () => `${urlPath}`},
+            {method: "PUT"},
+            body
+        ),
+        delete: () => makeRequest(
+            {getRequestUrl: () => `${urlPath}`},
+            {method: "DELETE"}
+        )
+    }
+}
+
+
 function decorateInstance(instance) {
     addReaderGroups(instance);
     addReaderFeatures(instance);
@@ -168,6 +193,7 @@ function decorateInstance(instance) {
     addMessageQueues(instance);
     addTransitionItems(instance);
     addSupport(instance);
+    addSNMP(instance);
     return instance;
 }
 
