@@ -9,6 +9,7 @@ var _ = require("lodash"),
     serveStatic = require("serve-static"),
     path = require("path"),
     tagRetriever = require("./tag_retriever"),
+    decorator = require("./instance_decorator"),
     q = require("q");
 
 function stringify(target) {
@@ -77,6 +78,7 @@ function throwNodeError(err, title, msg, node) {
         }));
 }
 
+
 function connectToItemsense(msg) {
     var Factory = Itemsense,
         instance = new Factory({
@@ -86,7 +88,7 @@ function connectToItemsense(msg) {
         });
     instance.username = msg.username;
     instance.password = msg.password;
-    return instance;
+    return decorator(instance);
 }
 
 function hasItemsenseInfo(msg) {
