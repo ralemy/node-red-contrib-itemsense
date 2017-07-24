@@ -17,7 +17,7 @@ module.exports = function (RED) {
             if (msg.topic === "TerminateLoop")
                 return;
 
-            node.tagRetriever = lib.tagRetriever("items");
+            node.tagRetriever = lib.tagRetriever(config.target);
 
             var opts = {
                 epcFilter: config.epcFilter,

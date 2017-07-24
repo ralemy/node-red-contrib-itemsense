@@ -14,13 +14,22 @@ class TagRetriever {
                 action: "get",
                 error: "Error in GetItems",
                 topic: "getItems",
-                responseKey:"items"
+                responseKey:"items",
+                moreAvailable:"moreItemsAvailable" //just a placeholder.
             },
             history: {
                 action: "getHistory",
                 error: "Error In Get Item History",
                 topic: "getHistory",
-                responseKey:"history"
+                responseKey:"history",
+                moreAvailable:"moreHistoryAvailable"
+            },
+            transitions:{
+                action: "getTransitions",
+                error: "Error in Get Transitions",
+                topic: "getTransitions",
+                responseKey: "transitions",
+                moreAvailable:"moreTransitionsAvailable"
             }
         };
         this.lib = lib;
@@ -46,7 +55,7 @@ class TagRetriever {
         return this.opts.itemsense.items[this.type.action](this.opts.params)
             .then((response) => {
                 tags = tags.concat(this.filterTags(response[this.type.responseKey]));
-                return this.createResponse(tags, response.nextPageMarker);
+                return this.createResponse(tags, response.nextPageMarker,response[this.type.moreAvailable]);
             });
     }
 
@@ -69,7 +78,7 @@ class TagRetriever {
         }]);
         return this.collectTags(tags)
     }
-    createResponse(tags, next) {
+    createResponse(tags, next,more) {
         const config = this.opts.config,
             shouldFetch = config.fetchMode === "all" ? !!next : next && tags.length < (config.pageSize || 100),
             progress = this.lib.getProgress(config, this.opts.count);
@@ -77,13 +86,14 @@ class TagRetriever {
             this.opts.params.pageMarker = next;
         else
             delete this.opts.params.pageMarker;
-        return shouldFetch ?
-            this.fetchMore(tags, progress) :
-        {
-            items: tags,
+        let result = {
             nexPageMarker: next,
             progress: progress
         };
+        result[this.type.responseKey] = tags;
+        result[this.type.moreAvailable] = more;
+        return shouldFetch ?
+            this.fetchMore(tags, progress) : result;
     }
 
     filterTags(items) {
@@ -100,7 +110,7 @@ class TagRetriever {
             }),
             {
                 topic: "success",
-                payload: `Retrieved ${response.items.length} tags from Itemsense. ${response.progress}`
+                payload: `Retrieved ${response[this.type.responseKey].length} tags from Itemsense. ${response.progress}`
             }
         ]);
     }

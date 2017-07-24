@@ -4,6 +4,7 @@
         color: '#efeb6d',
         defaults: {
             name: {value: ""},
+            target: {value:"items", required: true},
             epcFilter: {value: ""},
             repeat: {value: "None", required: true},
             pageSize: {value:100},
@@ -15,7 +16,7 @@
         outputs: 2,
         icon: "impinj.png",
         label: function () {
-            return this.name || "Get Items";
+            return this.name || "Get " + this.target;
         },
         oneditprepare:function(){
             function showRepeats(repeat){
@@ -28,6 +29,7 @@
                 else
                     $(".repeat-count").hide();
             }
+            $("#target").val(this.target);
             $("select#call-repeat").change(function(){
                 showRepeats($("select#call-repeat option:selected").val());
             });
@@ -45,6 +47,7 @@
         oneditsave:function(){
             $("#node-input-repeat").val( $("select#call-repeat option:selected").val());
             $("#node-input-fetchMode").val($("#select-fetchMode").val());
+            $("#node-input-target").val($("select#target option:selected").val());
         }
     });
 </script>
@@ -53,6 +56,15 @@
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Label To show in chart">
+    </div>
+    <div class="form-row">
+        <label for="target"><i class="fa fa-repeat"></i> Update </label>
+        <select id="target">
+            <option value="items">Items</option>
+            <option value="transitions">Transitions</option>
+            <option value="history">Item History</option>
+        </select>
+        <input type="hidden" id="node-input-target">
     </div>
     <div class="form-row">
         <label for="node-input-epcFilter"><i class="fa fa-filter"></i> EPC Filter</label>
