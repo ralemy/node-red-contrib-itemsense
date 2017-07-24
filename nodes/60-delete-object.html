@@ -33,6 +33,7 @@
             <option value="recipes" selected>Recipes</option>
             <option value="readerConfigurations">Reader Configurations</option>
             <option value="readerDefinitions">Reader Definitions</option>
+            <option value="thresholdAntennaConfigurations">Threshold Antenna Configurations</option>
             <option value="facilities">Facilities</option>
             <option value="zoneMaps">Zone Maps</option>
             <option value="users">Users</option>
@@ -46,6 +47,8 @@
     <p>Reads the Itemsense instance from the "itemsense" variable of the flow context, such as one created by a
     connect node. Expects the <code>msg.payload</code> to contain a <code>name</code> property, and that is used as
     the name of the object to delete.</p>
+    <p>For threshold antenna configurations, the <code>msg.payload</code> has to contain a <code>id</code> instead, and
+    it also may contain a <code>replacementId</code> that will be sent to itemsense.</p>
     <p>The first output contains the response from the server if the call was successful.
     </p>
         <p> The second output is for logging and debugging, contains a

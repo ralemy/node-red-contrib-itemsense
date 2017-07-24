@@ -32,10 +32,43 @@ function addReaderFeatures(instance){
     }
 }
 
+function addThresholdAntennaConfigurations(instance){
+    const makeRequest = instance._itemsenseService.makeRequest.bind(instance._itemsenseService);
+    const urlPath = "/configuration/v1/thresholds/antennaConfigurations";
+    function makeReplacement(replacement){
+        return (replacement) ? `?replacementId=${replacement}` : "";
+    }
+    instance.thresholdAntennaConfigurations = {
+        get: (id) => makeRequest(
+            {getRequestUrl:()=> `${urlPath}/${id}` },
+            {method:"GET"}
+        ),
+        getAll:()=> makeRequest(
+            {getRequestUrl:()=> urlPath},
+            {method:"GET"}
+        ),
+        create:(body)=>makeRequest(
+            {getRequestUrl:()=>urlPath},
+            {method:"POST"},
+            body
+        ),
+        replace:(body,id)=>makeRequest(
+            {getRequestUrl:()=>`${urlPath}/${id}`},
+            {method:"PUT"},
+            body
+        ),
+        delete:(id, replacement) =>makeRequest(
+            {getRequestUrl:()=>`${urlPath}/${id}` + makeReplacement(replacement)},
+            {method:"DELETE"}
+        )
+    }
+}
+
 
 function decorateInstance(instance) {
     addReaderGroups(instance);
     addReaderFeatures(instance);
+    addThresholdAntennaConfigurations(instance);
     return instance;
 }
 

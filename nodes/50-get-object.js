@@ -48,17 +48,24 @@ module.exports = function (RED) {
             }
         }
 
+        function getKey(msg){
+            if(!msg.payload)
+                return null;
+            if(config.objectType === "thresholdAntennaConfigurations")
+                return msg.payload.id;
+            return msg.payload.name;
+        }
         this.on("input", function (msg) {
-            var name = msg.payload ? msg.payload.name : null,
-                action = name ? "get" : "getAll",
-                title = (name ? name + " from" : "all") + " " + config.objectType,
+            const key = getKey(msg),
+                action = key ? "get" : "getAll",
+                title = (key ? key + " from" : "all") + " " + config.objectType,
                 itemsense = lib.getItemsense(node, msg, "Retracting " + title);
             if (itemsense)
-                itemsense[config.objectType][action](name).then(function (object) {
+                itemsense[config.objectType][action](key).then(function (object) {
                     lib.status("exit", "", node);
-                    msg.payload = name ? [object] : object;
+                    msg.payload = key ? [object] : object;
                     msg.topic = config.objectType;
-                    sendOutput(config.outputMode, msg, title, name);
+                    sendOutput(config.outputMode, msg, title, key);
                 }).catch(lib.raiseNodeRedError.bind(lib, "Itemsense Error get " + title, msg, node));
         });
     }

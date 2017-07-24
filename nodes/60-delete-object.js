@@ -4,30 +4,38 @@
  */
 module.exports = function (RED) {
     "use strict";
-    var lib = require("./lib/itemsense");
+    const lib = require("./lib/itemsense");
 
     function DeleteObjectNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this;
+        const node = this;
+
+        function getKey(msg){
+            if(!msg.payload)
+                return null;
+            if(config.objectType === "thresholdAntennaConfigurations")
+                return msg.payload.id;
+            return msg.payload.name;
+        }
 
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg, "delete " + name + " from " + config.objectType),
-                error ="No Name Provided in payload.name",
-                name = msg.payload ? msg.payload.name : null;
+            const key = getKey(msg),
+                itemsense = lib.getItemsense(node, msg, "delete " + key + " from " + config.objectType),
+                error ="No Name/id Provided in payload.name";
             if (itemsense)
-                if (!name)
+                if (!key)
                     lib.raiseNodeRedError(error,msg,node,{message:error});
                 else if (itemsense[config.objectType].delete)
-                    itemsense[config.objectType].delete(name).then(function (object) {
+                    itemsense[config.objectType].delete(key, msg.payload.replacementId).then(function (object) {
                         lib.status("exit","",node);
                         node.send([
                             lib.extend(msg, {payload: object || {}, topic: config.objectType}),
                             {
                                 topic: "success",
-                                payload: "deleted " + name + " from " + config.objectType,
+                                payload: "deleted " + key + " from " + config.objectType,
                                 data: object
                             }]);
-                    }).catch(lib.raiseNodeRedError.bind(lib,`Error deleting ${name} form ${config.objectType}`,msg,node));
+                    }).catch(lib.raiseNodeRedError.bind(lib,`Error deleting ${key} form ${config.objectType}`,msg,node));
                 else
                     lib.raiseNodeRedError(config.objectType + " does not support delete action",msg,node,{
                         statusCode:400,

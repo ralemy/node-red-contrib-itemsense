@@ -10,11 +10,17 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         var node = this;
 
+        function getAction(payload){
+            if(config.objectType === "thresholdAntennaConfigurations")
+                return payload.id ? "replace" : "create";
+            return "update";
+        }
+
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg,"Create or update " + config.objectType),
+            const itemsense = lib.getItemsense(node, msg,"Create or update " + config.objectType),
                 object = typeof msg.payload === "object" ? msg.payload : null;
-            if (itemsense)
-                itemsense[config.objectType].update(object).then(function (object) {
+            if (itemsense && object)
+                itemsense[config.objectType][getAction(object)](object,object.id).then(function (object) {
                     node.status({});
                     node.send([
                         lib.extend(msg, {payload: object, topic: config.objectType}),
