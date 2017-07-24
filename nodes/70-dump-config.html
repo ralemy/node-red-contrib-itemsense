@@ -4,18 +4,21 @@
         color: '#efeb6d',
         defaults: {
             name: {value: ""},
-            dumpMode: {value: "running", required: true},
+            dumpMode: {value: "logs", required: true},
             outputMode: {value:"array"},
-            jobId: {value: ""}
+            jobId: {value: ""},
+            logFile:{value:""}
         },
         inputs: 1,
         outputs: 2,
         icon: "impinj.png",
         label: function () {
-            var titles = {
+            const titles = {
                 running: "Running Job",
                 specific: "Specific Job",
-                instance: 'Instance'
+                instance: 'Instance',
+                logs: 'Logs',
+                configuration: "Configuration"
             };
             return this.name || "Dump Configuration for " + titles[this.dumpMode];
         },
@@ -29,6 +32,15 @@
                     $("#job-output-mode").show();
                 else
                     $("#job-output-mode").hide();
+                if ("logs" === value)
+                    $("#logs-input-component").show();
+                else
+                    $("#logs-input-component").hide();
+                if ("configuration" === value)
+                    $("#logs-input-component").show();
+                else
+                    $("#logs-input-component").hide();
+
             }
 
             $("#dump-modes").val(this.dumpMode);
@@ -53,8 +65,10 @@
     <div class="form-row">
         <label for="dump-modes"><i class="fa fa-repeat"></i> Mode </label>
         <select id="dump-modes">
-            <option value="running" selected>Running Job</option>
-            <option value="specific" selected>Specific Job</option>
+            <option value="logs" selected>Logs</option>
+            <option value="configuration" selected>Configuration</option>
+            <option value="running">Running Job</option>
+            <option value="specific">Specific Job</option>
             <option value="instance">Instance</option>
         </select>
         <input type="hidden" id="node-input-dumpMode">
@@ -71,6 +85,10 @@
         <label for="node-input-jobId"><i class="icon-tag"></i> Job Id</label>
         <input type="text" id="node-input-jobId" placeholder="jobId">
     </div>
+    <div class="form-row" id="logFile-input-component">
+        <label for="node-input-logFile"><i class="icon-tag"></i> Log File</label>
+        <input type="text" id="node-input-logFile" placeholder="logFileName">
+    </div>
 
 
 </script>
@@ -86,6 +104,9 @@
     </p>
     <p> When Mode is set to "Instance", it dumps the recipes, reader configurations, reader definitions, zone maps,
     facilities, and the current zone map for each facility.</p>
+    <p> When Mode is set to "Logs" or "Configuration", there needs to be a log file name to dump the tar.gz file. the name could also be
+    supplied by the <code>msg.filename</code> property the <code>msg.payload</code> of the first output will contain the
+    name of the file. If the filename doesn't end with .tar.gz it will be added.</p>
     <p>The <code>msg.payload</code> of the first output contains Object that has a key for each dumped entity, if the operation succeeds.</p>
     <p> The second output is for logging and debugging, contains a
     <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result

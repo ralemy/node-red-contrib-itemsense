@@ -54,12 +54,14 @@
   "dependencies": {
     "amqp": "^0.2.4",
     "fluent-logger": "^1.1.1",
+    "is-tool": "^0.2.0",
     "itemsense-node": "^1.4.1",
     "lodash": "^4.6.1",
+    "pako": "^1.0.5",
     "q": "^1.4.1",
     "request": "^2.70.0",
     "serve-static": "^1.11.1",
     "string_decoder": "^0.10.31",
-    "is-tool": "^0.2.0"
+    "text-encoding": "^0.6.4"
   }
 }

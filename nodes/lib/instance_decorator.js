@@ -3,6 +3,10 @@
  * decorates instance for functionality not yet implemented.
  */
 
+const request = require("request");
+const q = require("q");
+const fs = require("fs");
+
 function addReaderGroups(instance) {
     const makeRequest = instance._itemsenseService.makeRequest.bind(instance._itemsenseService);
     instance.readerGroups = {
@@ -116,21 +120,46 @@ function addMessageQueues(instance) {
     }
 }
 
-function makeQueryString(obj){
-    let s="";
+function makeQueryString(obj) {
+    let s = "";
+    if (typeof obj !== "object") return s;
     for (let i in obj)
-        if(obj.hasOwnProperty(i))
-            s+=`&${encodeURIComponent(i)}=${encodeURIComponent(obj[i])}`;
-    return s.length ? `?${s.substr(1)}`:"";
+        if (obj.hasOwnProperty(i))
+            s += `&${encodeURIComponent(i)}=${encodeURIComponent(obj[i])}`;
+    return s.length ? `?${s.substr(1)}` : "";
 }
 
-function addTransitionItems (instance){
+function addTransitionItems(instance) {
     const makeRequest = instance._itemsenseService.makeRequest.bind(instance._itemsenseService);
-    instance.items.getTransitions=(body)=>makeRequest(
-        {getRequestUrl:()=> "/data/v1/items/show/transitions" + makeQueryString(body)},
-        {method:"GET"}
+    instance.items.getTransitions = (body) => makeRequest(
+        {getRequestUrl: () => "/data/v1/items/show/transitions" + makeQueryString(body)},
+        {method: "GET"}
     )
 }
+
+function dumpToFile(instance, url, fn) {
+    const defer = q.defer();
+    fn = fn.endsWith(".tar.gz") ? fn : fn + ".tar.gz";
+    request(url)
+        .on("end", () => defer.resolve(fn))
+        .auth(instance._itemsenseConfig.username, instance._itemsenseConfig.password)
+        .pipe(fs.createWriteStream(fn));
+    return defer.promise;
+}
+
+function addSupport(instance) {
+    const makeRequest = instance._itemsenseService.makeRequest.bind(instance._itemsenseService);
+    instance.support = {
+        logs: (fn, opts) => dumpToFile(instance,
+            instance.itemsenseUrl + "/support/v1/logs" + makeQueryString(opts),
+            fn),
+        configuration: (fn) => dumpToFile(instance,
+            instance.itemsenseUrl + "/support/v1/configuration",
+            fn
+        )
+    }
+}
+
 function decorateInstance(instance) {
     addReaderGroups(instance);
     addReaderFeatures(instance);
@@ -138,6 +167,7 @@ function decorateInstance(instance) {
     addThresholdAntennaConfigurations(instance);
     addMessageQueues(instance);
     addTransitionItems(instance);
+    addSupport(instance);
     return instance;
 }
 

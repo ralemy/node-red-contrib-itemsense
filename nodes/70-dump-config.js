@@ -6,14 +6,30 @@ module.exports = function (RED) {
     "use strict";
     var lib = require("./lib/itemsense"),
         q = require("q"),
+        pako = require("pako"),
+        txtd = require("text-encoding"),
         _ = require("lodash");
+
+    function getLogParams(msg) {
+        let result = {};
+        if (typeof msg.payload !== "object") return result;
+        for (let item in ["from", "to", "extended"])
+            if (msg.payload.hasOwnProperty(item))
+                result[item] = msg.payload[item];
+        return result;
+    }
+
 
     function DumpConfigNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this;
+        const node = this;
+
+        function getFileName(msg){
+            return msg.filename || config.logFile;
+        }
 
         function dumpAllConfig(itemsense) {
-            var result = {
+            let result = {
                 signature: "Dump configuration for Itemsense Instance: " + itemsense.itemsenseUrl,
                 timestamp: new Date().toUTCString(),
                 recipes: null,
@@ -110,14 +126,14 @@ module.exports = function (RED) {
         }
 
         this.on("input", function (msg) {
-            var itemsense = lib.getItemsense(node, msg,"Dumping Configuration"),
+            var itemsense = lib.getItemsense(node, msg, "Dumping Configuration"),
                 jobId = msg.payload ? msg.payload.id || config.jobId : config.jobId;
             if (itemsense)
                 if (config.dumpMode === "specific")
                     getJobById(itemsense, jobId).then(function (job) {
                         return dumpJobData(itemsense, job);
                     }).then(function (result) {
-                        lib.status("exit","",node);
+                        lib.status("exit", "", node);
                         msg.payload = result;
                         node.send([msg, {
                             topic: "success",
@@ -142,33 +158,47 @@ module.exports = function (RED) {
                                 message: "No Job running on instance " + itemsense.itemsenseUrl
                             });
                         msg.payload = jobs;
-                        lib.status("exit","",node);
+                        lib.status("exit", "", node);
                         if (config.outputMode === "array")
                             node.send([msg, {
                                 topic: "success",
                                 payload: `Dumped objects related to ${jobs.length} running jobs`
                             }]);
                         else
-                            _.each(jobs,(job)=>{
-                                const copy = _.extend({},msg);
+                            _.each(jobs, (job) => {
+                                const copy = _.extend({}, msg);
                                 copy.payload = job;
-                                node.send([copy,{
+                                node.send([copy, {
                                     topic: "success",
                                     payload: `Dumped objects related to running job ${job.job.id}`,
                                     count: job.totalJobsRunning,
                                     index: job.index
                                 }]);
                             });
-                    }).catch(lib.raiseNodeRedError.bind(lib,"Error dumping running job", msg,node));
+                    }).catch(lib.raiseNodeRedError.bind(lib, "Error dumping running job", msg, node));
+                else if (config.dumpMode === "logs" || config.dumpMode === "configuration")
+                    if (getFileName(msg))
+                        itemsense.support[config.dumpMode](getFileName(msg),getLogParams(msg)).then(response => {
+                            lib.status("exit", "", node);
+                            msg.topic = config.dumpMode;
+                            msg.payload = response;
+                            node.send([msg, {
+                                    topic: "success",
+                                    payload: `Compressed file of ${config.dumpMode} downloaded`
+                                }]
+                            )
+                        }).catch(lib.raiseNodeRedError.bind(lib, "Error dumping "+config.dumpMode, msg, node));
+                    else
+                        lib.raiseNodeRedError("Error dumping "+config.dumpMode, msg, node, "No File name to save "+config.dumpMode);
                 else
                     dumpAllConfig(itemsense).then((result) => {
-                        lib.status("exit","",node);
+                        lib.status("exit", "", node);
                         msg.payload = result;
                         node.send([msg, {
                             topic: "success",
                             payload: `Dumped Configuration for Itemsense Instance ${itemsense.itemsenseUrl}`
                         }]);
-                    }).catch(lib.raiseNodeRedError.bind(lib, `Error dumping config for ${itemsense.itemsenseUrl}`, msg,node));
+                    }).catch(lib.raiseNodeRedError.bind(lib, `Error dumping config for ${itemsense.itemsenseUrl}`, msg, node));
         });
     }
 
