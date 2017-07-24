@@ -32,6 +32,7 @@
       "delete-object": "nodes/60-delete-object.js",
       "current-zone": "nodes/65-current-zone.js",
       "dump-config": "nodes/70-dump-config.js",
+      "is-upgrade": "nodes/71-is-upgrade.js",
       "load-config": "nodes/85-load-config.js",
       "json-output": "nodes/75-json-output.js",
       "log-fluent": "nodes/76-log-to-fluent.js",

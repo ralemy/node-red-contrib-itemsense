@@ -1,0 +1,69 @@
+<script type="text/javascript">
+    RED.nodes.registerType('is-upgrade', {
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            name: {value: ""},
+            task: {value: "image", required: true},
+        },
+        inputs: 1,
+        outputs: 2,
+        icon: "impinj.png",
+        label: function () {
+            const titles ={
+                image:"Show Images",
+                show: "Show Upgrades",
+                start: "Start Upgrade",
+                stop: "Cancel Upgrade"
+            };
+            return this.name || titles[this.task];
+        },
+        oneditprepare: function () {
+            $("#task").val(this.task);
+        },
+        oneditsave: function () {
+            $("#node-input-task").val($("select#task option:selected").val());
+        }
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="is-upgrade">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="task"><i class="fa fa-repeat"></i>Task </label>
+        <select id="task">
+            <option value="image" selected>Show Images</option>
+            <option value="show">Show Upgrades</option>
+            <option value="start">Start Upgrade</option>
+            <option value="stop">Cancel Upgrade</option>
+        </select>
+        <input type="hidden" id="node-input-task">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="is-upgrade">
+    <h3>Upgrades reader firmware or cap</h3>
+    <p>Reads the Itemsense instance from the "itemsense" variable of the flow context, such as one created by a
+    connect node. </p>
+    <p> if Task is set to "Show Images", it will list all images available. the imageType is read from <code>msg.payload</code>
+    and defaults to <code>FIRMWAY_SPEEDWAY</code>. if <code>msg.payload</code> contains a <code>version</code> key, then
+    it will  show only that version for the imageType</p>
+    <p> if Task is set to "Show Upgrade" then it will return the list of upgrade requests in the first output. if
+    <code>msg.payload</code> has an <code>upgradeInstanceId or id</code> key it will show the upgrade request with that upgradeInstanceId </p>
+    <p> if task is set to "Start Upgrade" then <code>msg.payload</code> will be sent to Start upgrade endpoint of ItemSense</p>
+    <p> if task is set to "Stop Upgrade then <code>msg.payload</code> should have an <code>upgradeInstanceId or id</code> key to cancel
+    the upgrade task.</p>
+        <p> The second output is for logging and debugging, contains a
+    <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
+    of the operation.</p>
+    <p>the "success" message from the second output contains a <code>count</code> which contains the number of objects found in
+    the operation. in <code>Single Object</code> mode, the <code>payload</code> of both first and second outputs contain
+     an <code>index</code> which shows the index of the
+     object being sent in the first output, and a <code>count</code> property that shows how many objects are in the collection
+     in total.</p>
+
+</script>

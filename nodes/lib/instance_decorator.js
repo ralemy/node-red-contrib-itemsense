@@ -209,8 +209,37 @@ function addHealth(instance){
             body
         )
     };
-
 }
+
+
+function addSoftware(instance){
+    const makeRequest = instance._itemsenseService.makeRequest.bind(instance._itemsenseService);
+    const imageList = "/configuration/v1/softwareVersions/list";
+    const imageUrl = "/configuration/v1/softwareVersions/show";
+    const upgradeUrl = "/control/v1/upgrades";
+    instance.upgrade = {
+        image: (type,version) => makeRequest(
+            {getRequestUrl: () => version ? `${imageUrl}/${type}/${version}`:`${imageList}/${type}`},
+            {method: "GET"}
+        ),
+        show: (id) => makeRequest(
+            {getRequestUrl: () => id? `${upgradeUrl}/show/${id}`:upgradeUrl + "/show"},
+            {method: "GET"}
+        ),
+        start:(body) => makeRequest(
+            {getRequestUrl: () => upgradeUrl + "/start"},
+            {method: "POST"},
+            body
+        ),
+        stop:(id) => makeRequest(
+            {getRequestUrl: () => `${upgradeUrl}/stop/${id}`},
+            {method: "POST"}
+        )
+    };
+}
+
+
+
 function decorateInstance(instance) {
     addReaderGroups(instance);
     addReaderFeatures(instance);
@@ -221,6 +250,7 @@ function decorateInstance(instance) {
     addSupport(instance);
     addSNMP(instance);
     addHealth(instance);
+    addSoftware(instance);
     return instance;
 }
 
