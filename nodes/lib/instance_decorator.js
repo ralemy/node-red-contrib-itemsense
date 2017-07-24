@@ -93,7 +93,7 @@ function addThresholdConfigurations(instance){
     }
 }
 
-function addMessaggeQueues(instance){
+function addMessageQueues(instance){
     const makeRequest = instance._itemsenseService.makeRequest.bind(instance._itemsenseService);
     instance.queueTypes={
         items:payload => makeRequest(
@@ -110,7 +110,7 @@ function addMessaggeQueues(instance){
             {getRequestUrl:()=> "/health/v1/events/queues"},
             {method:"PUT"},
             payload
-        ),
+        )
 }
 }
 
