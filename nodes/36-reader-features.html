@@ -1,0 +1,55 @@
+<script type="text/javascript">
+    RED.nodes.registerType('reader-features', {
+        category: 'Itemsense',
+        color: '#efeb6d',
+        defaults: {
+            name: {value: ""},
+            task: {value:"configureFeature",required:true}
+        },
+        inputs: 1,
+        outputs: 2,
+        icon: "impinj.png",
+        label: function () {
+            return this.name || this.task;
+        },
+        oneditprepare: function () {
+            $("#task").val(this.task);
+        },
+        oneditsave: function () {
+            $("#node-input-task").val($("select#task option:selected").val());
+        }
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="reader-features">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Label To show in chart">
+    </div>
+    <div class="form-row">
+        <label for="task"><i class="fa fa-repeat"></i> Task </label>
+        <select id="task">
+            <option value="configureFeature" selected>Configure Feature</option>
+            <option value="getFeatureStatus">Get Feature Status</option>
+            <option value="getActiveFeatureRequestStatus">Get Active Feature Status</option>
+        </select>
+        <input type="hidden" id="node-input-task">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="reader-features">
+    <h3>ItemSense feature configuration for readers</h3>
+    <p>Expects the Itemsense instance to be in "itemsense" flow variable, as done by the connect node.</p>
+    <p>Three task can be performed with this node. with Configure Feature, the <code>msg.payload</code> should specify
+    a readerDefinitionName, and a body object containing the feature and the action as explained in http://developer.impinj.com
+    </p>
+    <p> For Get Feature Status, the <code>msg.payload</code> should specify a readerDefinitionName, and a body object
+    containing the desired feature</p>
+    <p> For Get Active Feature Request Status, the <code>msg.payload</code> should specify a readerDefinitionName.</p>
+    <p> The first output will return the result of the task</p>
+    <p> The second output is for logging and debugging, contains a
+    <code>msg.topic</code> that is set to "success" or "error" and a human readable message explaining the result
+    of the operation.
+    </p>
+</script>

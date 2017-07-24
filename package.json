@@ -24,6 +24,7 @@
       "stop-job": "nodes/25-stop-job.js",
       "wait-status": "nodes/30-wait-status.js",
       "get-items": "nodes/35-get-items.js",
+      "reader-features": "nodes/36-reader-features.js",
       "item-history": "nodes/40-item-history.js",
       "queue-client": "nodes/45-queue-client.js",
       "get-object": "nodes/50-get-object.js",
