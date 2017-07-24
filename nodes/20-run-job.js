@@ -35,11 +35,13 @@ module.exports = function (RED) {
         this.on("input", function (msg) {
             var itemsense = lib.registerItemsense(node, msg, LocalItemsense),
                 jobObject = {
+                    "readerGroups":null,
                     "recipeName": config.recipe,
                     "durationSeconds": config.runLength,
                     "presenceLoggingEnabled": true,
                     "startDelay": config.startDelay,
                     "reportToDatabaseEnabled": true,
+                    "reportToHistoryEnabled": true,
                     "reportToMessageQueueEnabled": true,
                     "reportToFileEnabled": false,
                     "facility": config.facility
