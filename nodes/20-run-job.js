@@ -41,7 +41,6 @@ module.exports = function (RED) {
                     "readerGroups":getReaderGroups(config.readerGroups),
                     "recipeName": config.recipe,
                     "durationSeconds": config.runLength,
-//                    "presenceLoggingEnabled": true,
                     "startDelay": config.startDelay,
                     "reportToDatabaseEnabled": true,
                     "reportToHistoryEnabled": true,
