@@ -27,7 +27,10 @@ module.exports = function (RED) {
                 };
         return {jobId: null, body: {statusCode: 500, message: err.message}, message: err.message};
     }
-
+    function getReaderGroups(g){
+        if(!g) return null;
+        return g.split(",");
+    }
     function RunJobNode(config) {
         RED.nodes.createNode(this, config);
         var node = this,
@@ -35,10 +38,10 @@ module.exports = function (RED) {
         this.on("input", function (msg) {
             var itemsense = lib.registerItemsense(node, msg, LocalItemsense),
                 jobObject = {
-                    "readerGroups":null,
+                    "readerGroups":getReaderGroups(config.readerGroups),
                     "recipeName": config.recipe,
                     "durationSeconds": config.runLength,
-                    "presenceLoggingEnabled": true,
+//                    "presenceLoggingEnabled": true,
                     "startDelay": config.startDelay,
                     "reportToDatabaseEnabled": true,
                     "reportToHistoryEnabled": true,
@@ -46,6 +49,7 @@ module.exports = function (RED) {
                     "reportToFileEnabled": false,
                     "facility": config.facility
                 };
+            console.log(jobObject);
             Object.keys(jobObject).forEach(function (key) {
                 if (msg.payload && msg.payload[key] !== undefined){
                     jobObject[key] = msg.payload[key];

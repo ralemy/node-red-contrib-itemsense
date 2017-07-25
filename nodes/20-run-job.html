@@ -8,7 +8,8 @@
             recipe: {value: ""},
             runLength: {value: 300, required: true},
             startDelay: {value: "PT0S", required: true},
-            facility: {value: "DEFAULT"}
+            facility: {value: "DEFAULT"},
+            readerGroups: {value:""}
         },
         inputs: 1,
         outputs: 3,
@@ -93,6 +94,10 @@
     <div class="form-row">
         <label for="node-input-startDelay"><i class="fa fa-hourglass-start"></i> Start Delay</label>
         <input type="text" id="node-input-startDelay" placeholder="Seconds to delay starting the job">
+    </div>
+    <div class="form-row">
+        <label for="node-input-readerGroups"><i class="fa fa-clock-o"></i> Reader Groups</label>
+        <input type="text" id="node-input-readerGroups" placeholder="Comma separated Reader Groups">
     </div>
     <div class="form-row">
         <label for="node-input-facility"><i class="fa fa-file-text"></i> Facility</label>
