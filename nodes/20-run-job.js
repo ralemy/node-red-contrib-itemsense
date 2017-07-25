@@ -48,7 +48,6 @@ module.exports = function (RED) {
                     "reportToFileEnabled": false,
                     "facility": config.facility
                 };
-            console.log(jobObject);
             Object.keys(jobObject).forEach(function (key) {
                 if (msg.payload && msg.payload[key] !== undefined){
                     jobObject[key] = msg.payload[key];
