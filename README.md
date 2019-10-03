@@ -2,6 +2,7 @@
 Node-RED contribution package that adds nodes which enable the use of Impinj ItemSense IoT Platform
 
 On Par with ItemSense 2017R1
+Note to update lodash.
 
 ## Setting up
 - install node (tested with v 5.10.1) from [Nodejs Site](https://nodejs.org/en/download/)
